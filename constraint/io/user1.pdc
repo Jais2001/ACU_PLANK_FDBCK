@@ -1,0 +1,606 @@
+# Microchip I/O Physical Design Constraints file
+
+# User I/O Constraints file 
+
+# Version: 2024.2 2024.2.0.13
+
+# Family: SmartFusion2 , Die: M2S090TS , Package: 676 FBGA
+
+# Date generated: Mon Apr  7 20:30:33 2025 
+
+
+# 
+# User Locked I/O Bank Settings
+# 
+
+
+# 
+# Unlocked I/O Bank Settings
+# The I/O Bank Settings can be locked by directly editing this file
+# or by making changes in the I/O Attribute Editor
+# 
+
+
+# 
+# User Locked I/O settings
+# 
+
+set_io i_TR_pulse     \
+    -pinname AB22     \
+    -fixed yes        \
+    -RES_PULL Up      \
+    -DIRECTION INPUT
+
+
+set_io i_attn_31p5    \
+    -pinname AB23     \
+    -fixed yes        \
+    -RES_PULL Up      \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[0]}  \
+    -pinname F23           \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[1]}  \
+    -pinname J6            \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[2]}  \
+    -pinname L3            \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[3]}  \
+    -pinname G22           \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[4]}  \
+    -pinname H21           \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[5]}  \
+    -pinname M3            \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[6]}  \
+    -pinname J7            \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io {i_fdbck_plank[7]}  \
+    -pinname E22           \
+    -fixed yes             \
+    -DIRECTION INPUT
+
+
+set_io i_inhibit      \
+    -pinname AC23     \
+    -fixed yes        \
+    -RES_PULL Up      \
+    -DIRECTION INPUT
+
+
+set_io i_phase_180    \
+    -pinname AD24     \
+    -fixed yes        \
+    -RES_PULL Up      \
+    -DIRECTION INPUT
+
+
+set_io i_rx_serial    \
+    -pinname T5       \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io {o_ATT1[0]}     \
+    -pinname P19       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT1[1]}     \
+    -pinname V16       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT1[2]}     \
+    -pinname Y16       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT1[3]}     \
+    -pinname Y15       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT1[4]}     \
+    -pinname W16       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT1[5]}     \
+    -pinname V15       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[0]}     \
+    -pinname P16       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[1]}     \
+    -pinname P17       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[2]}     \
+    -pinname T18       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[3]}     \
+    -pinname U18       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[4]}     \
+    -pinname V18       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT2[5]}     \
+    -pinname V19       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[0]}     \
+    -pinname M10       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[1]}     \
+    -pinname N1        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[2]}     \
+    -pinname K6        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[3]}     \
+    -pinname J2        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[4]}     \
+    -pinname H4        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT3[5]}     \
+    -pinname K5        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[0]}     \
+    -pinname K1        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[1]}     \
+    -pinname K2        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[2]}     \
+    -pinname J4        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[3]}     \
+    -pinname N5        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[4]}     \
+    -pinname K10       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_ATT4[5]}     \
+    -pinname L10       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_BITE_CNTRL    \
+    -pinname U1        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_SUB_ARRAY     \
+    -pinname T8        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_0    \
+    -pinname AE24      \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_1    \
+    -pinname R1        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_2    \
+    -pinname F3        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_3    \
+    -pinname L23       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_4    \
+    -pinname A17       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_5    \
+    -pinname F7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_6    \
+    -pinname B11       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_TR_pulse_7    \
+    -pinname E26       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_0   \
+    -pinname AC25      \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_1   \
+    -pinname P2        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_2   \
+    -pinname F8        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_3   \
+    -pinname N21       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_4   \
+    -pinname F18       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_5   \
+    -pinname J12        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_6   \
+    -pinname E14       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_attn_31p5_7   \
+    -pinname A24       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_enable[0]}   \
+    -pinname R6        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_enable[1]}   \
+    -pinname R9        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_enable[2]}   \
+    -pinname R7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_enable[3]}   \
+    -pinname R5        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_0     \
+    -pinname W19       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_1     \
+    -pinname P4        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_2     \
+    -pinname H5        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_3     \
+    -pinname C25       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_4     \
+    -pinname D18       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_5     \
+    -pinname D7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_6     \
+    -pinname H15       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_inhibit_7     \
+    -pinname C24       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_0   \
+    -pinname AC24      \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_1   \
+    -pinname R2        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_2   \
+    -pinname G3        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_3   \
+    -pinname L24       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_4   \
+    -pinname E19       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_5   \
+    -pinname B7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_6   \
+    -pinname D9        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_phase_180_7   \
+    -pinname M23       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[0]}  \
+    -pinname AC26          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[1]}  \
+    -pinname AB11          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[2]}  \
+    -pinname M7            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[3]}  \
+    -pinname L25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[4]}  \
+    -pinname A19           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[5]}  \
+    -pinname E7            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[6]}  \
+    -pinname H14           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_reset_plank[7]}  \
+    -pinname F2            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[0]}  \
+    -pinname P18         \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[1]}  \
+    -pinname L7          \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[2]}  \
+    -pinname G1          \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[3]}  \
+    -pinname T19         \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[4]}  \
+    -pinname V20         \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[5]}  \
+    -pinname G2          \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[6]}  \
+    -pinname K7          \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io {o_tx_serial[7]}  \
+    -pinname U20         \
+    -fixed yes           \
+    -DIRECTION OUTPUT
+
+
+set_io o_tx_serial_fdbck  \
+    -pinname T7           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+
+# 
+# Dedicated Peripheral I/O Settings
+# 
+
+
+# 
+# Unlocked I/O settings
+# The I/Os in this section are unplaced or placed but are not locked
+# the other listed attributes have been applied
+# 
+
+
+#
+#Ports using Dedicated Pins
+
+#
+
+#set_io DEVRST_N       \
+#    -pinname U16      \
+#    -DIRECTION INPUT
+
+
