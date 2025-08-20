@@ -1,7 +1,7 @@
 module UART_Controlller_ACU_Plank (
     input wire i_clk_100,
     input wire i_rst_n,
-    // input wire i_usr_rst,
+    input wire i_usr_rst,
     input wire i_rx_serial,
 
     input wire i_attn_31p5,
@@ -90,7 +90,9 @@ module UART_Controlller_ACU_Plank (
     reg  r_SUB_ARRAY;
     reg [2:0] r_Plank_module;
 
-    reg[2:0]r_Plank_count;
+    reg[3:0]r_Plank_count;
+
+    reg[4:0] r_ADC_Temp_CNTR;
 
     reg[151:0] r_send_plank;
     reg[4:0] r_send_counter;
@@ -179,8 +181,8 @@ module UART_Controlller_ACU_Plank (
         end
     end
 
-    // assign w_rst_n = ~i_rst_n ^ i_usr_rst;
-    assign w_rst_n = i_rst_n;
+    assign w_rst_n = ~i_rst_n ^ i_usr_rst;
+    // assign w_rst_n = i_rst_n;
 
     // Variables for the ACU packet identifier
     localparam ACU_LENGTH = 7; // Total packet size In bytes inluding Identifier,data,checksum
@@ -224,9 +226,10 @@ module UART_Controlller_ACU_Plank (
 
 
     // Variables for Sensor Readback identifier
-    localparam SNSR_LENGTH = 20; // Total packet size In bytes inluding Identifier,data,checksum
+    localparam SNSR_LENGTH = 3; // Total packet size In bytes inluding Identifier,data,checksum
     wire [(SNSR_LENGTH*8) - 1 : 0] w_SNSR_data;
     wire w_SNSR_data_valid;
+    reg r_SNSR_data_valid;
 
     // Sensor Readback identifier
     UART_packet_identifier #(
@@ -273,6 +276,7 @@ module UART_Controlller_ACU_Plank (
         if (~w_rst_n) begin
             r_Plank_module <= 0;
             r_plank_data   <= 0;
+            r_soft_inhibit <= 0;
         end else begin
             if (w_PLANK_data_valid) begin 
                 r_soft_inhibit       <= w_PLANK_data[7];
@@ -320,10 +324,12 @@ module UART_Controlller_ACU_Plank (
     localparam SM_Fdbck_ACK_3 = 3'd2;
 
     reg[2:0] SM_Sensor_Fdcbk;
-    localparam SM_Sensor_1 = 3'd0;
-    localparam SM_Sensor_2 = 3'd1;
-    localparam SM_Sensor_3 = 3'd2;
-    localparam SM_Sensor_4 = 3'd3;
+    localparam SM_Sensor_STRT = 3'd0;
+    localparam SM_Sensor_1 = 3'd1;
+    localparam SM_INCT_Cnt = 3'd2;
+    localparam SM_SNSR_Get = 3'd3;
+    localparam SM_PLNK_INCRT = 3'd4;
+    localparam SM_Delay_State = 3'd5;
 
     always @(posedge i_clk_100 or negedge w_rst_n) begin // buffering 
         if (~w_rst_n) begin
@@ -339,22 +345,43 @@ module UART_Controlller_ACU_Plank (
             end
         end
     end
+
+    reg r_start_data;
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_start_data <= 1'b0;
+        end else begin
+            r_start_data <= 1'b0;
+            if ((r_plank_data_module == 8'hCC) && r_plank_module_valid) begin
+                r_start_data <= 1'b1;
+            end
+        end
+    end
     
     always @(posedge i_clk_100 or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_Plank_count <= 3'd0;
-            SM_Sensor_Fdcbk <= SM_Sensor_1;
+            r_Plank_count <= 4'd0;
+            SM_Sensor_Fdcbk <= SM_Sensor_STRT;
             r_ACK_FDBCK_done <= 1'b0;
+            r_SNSR_data_valid <= 1'b0;
+            r_ADC_Temp_CNTR <= 5'd0;
+            r_uart_tx_valid_fdbck <= 1'b0;
+            r_uart_tx_data_fdbck <= 7'd0;
             r_buff_ACK_FDBCK_done <= 1'b0;
             SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
         end else begin
             r_uart_tx_valid_fdbck <= 1'b0;
 
-            if (w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
+            if ((w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) && w_uart_rx_valid_fdbck_Plank[r_Plank_module] )begin//w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
                 r_ACK_FDBCK_done <= 1'b1;
             end
 
             r_buff_ACK_FDBCK_done <= r_ACK_FDBCK_done;
+
+            if (w_SNSR_data_valid) begin
+                r_SNSR_data_valid <= 1'b1;
+            end
 
 
             if (~w_uart_tx_active_fdbck && r_buff_ACK_FDBCK_done) begin
@@ -392,36 +419,48 @@ module UART_Controlller_ACU_Plank (
 
             if (~w_uart_tx_active_fdbck && ~r_buff_ACK_FDBCK_done) begin
                 case (SM_Sensor_Fdcbk)
+                    SM_Sensor_STRT : begin
+                        SM_Sensor_Fdcbk <= SM_Sensor_STRT;
+                        if (r_SNSR_data_valid) begin
+                            SM_Sensor_Fdcbk <= SM_SNSR_Get;
+                            r_SNSR_data_valid <= 1'b0;
+                        end
+                    end
+                    SM_SNSR_Get : begin
+                        SM_Sensor_Fdcbk <= SM_SNSR_Get;
+                        if (r_start_data) begin
+                            SM_Sensor_Fdcbk <= SM_Sensor_1;
+                        end
+                    end
                     SM_Sensor_1: begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_1;
                         if (r_plank_module_valid) begin
                             r_uart_tx_data_fdbck <= r_plank_data_module;
+                            r_ADC_Temp_CNTR <= r_ADC_Temp_CNTR + 1'b1;
                             r_uart_tx_valid_fdbck <= 1'b1;
-                            SM_Sensor_Fdcbk <= SM_Sensor_2;
                         end 
+                        if (r_ADC_Temp_CNTR < 5'd13) begin
+                            SM_Sensor_Fdcbk <= SM_Sensor_1;
+                        end else begin
+                            SM_Sensor_Fdcbk <= SM_PLNK_INCRT;
+                        end
                     end
-                    SM_Sensor_2 : begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_2;
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
-                            r_uart_tx_valid_fdbck <= 1'b1;
-                            SM_Sensor_Fdcbk <= SM_Sensor_3;
-                        end 
+                    SM_PLNK_INCRT : begin
+                        r_ADC_Temp_CNTR <= 4'd0;
+                        r_uart_tx_data_fdbck <= r_Plank_count;
+                        r_uart_tx_valid_fdbck <= 1'b1;
+                        r_Plank_count <= r_Plank_count + 1;
+                        SM_Sensor_Fdcbk <= SM_Delay_State;
                     end
-                    SM_Sensor_3 : begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_3;
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
-                            r_uart_tx_valid_fdbck <= 1'b1;
-                            r_Plank_count <= r_Plank_count + 1;
-                            SM_Sensor_Fdcbk <= SM_Sensor_4;
-                        end 
-                    end
-                    SM_Sensor_4 : begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_1;
+                    SM_Delay_State : begin
+                        if (r_Plank_count < 4'd8) begin
+                            SM_Sensor_Fdcbk <= SM_SNSR_Get;
+                        end else begin
+                            r_Plank_count <= 4'd0;
+                            SM_Sensor_Fdcbk <= SM_Sensor_STRT;
+                        end
                     end
                     default: begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_1;
+                        SM_Sensor_Fdcbk <= SM_Sensor_STRT;
                     end
                 endcase
             end
@@ -433,6 +472,7 @@ module UART_Controlller_ACU_Plank (
             r_uart_tx_data      <= 0;
             r_uart_tx_valid     <= 0;
             r_send_counter      <= 0;
+            r_send_plank     <= 0;
             send_plank_data     <= SM_1;
         end else begin
             r_uart_tx_valid <= 0;

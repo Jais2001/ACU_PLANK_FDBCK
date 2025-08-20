@@ -4,7 +4,7 @@ module UART_Controlller_ACU_Plank_tb();
     bit i_clk_100 = 0;
     bit i_rst_n_1;
     bit i_rst_n_2;
-    bit i_rx_serial;
+    logic i_rx_serial;
 
     bit i_attn_31p5;
     bit i_phase_180;
@@ -62,15 +62,23 @@ module UART_Controlller_ACU_Plank_tb();
     reg [7:0] ACU_checksum = 8'd0;
     reg [7:0] ACU_data [0:8];
 
+    reg [7:0] SNSR_checksum = 8'd0;
+    reg [7:0] SNSR_data [0:4];
+
     reg [7:0] PLANK_data[0:21];
     reg [7:0] PLANK_checksum = 8'd0;
 
-    integer k;
+    integer k,b;
 
     initial begin
     
         ACU_data[0] = 8'hAA; //header
         ACU_data[8] = 8'h55; // Footer
+
+        SNSR_data[0] = 8'hAA;
+        SNSR_data[1] = 8'h04;
+        SNSR_data[2] = 8'h11;
+        SNSR_data[4] = 8'h55;
 
         PLANK_data[0] = 8'hAA; //header
         PLANK_data[1] = {3'b111,1'd0,4'h2};
@@ -79,6 +87,12 @@ module UART_Controlller_ACU_Plank_tb();
         for (k = 2;k<19;k = k+ 1) begin
             PLANK_data[k] = {1'd0,1'd0,6'b110010};
         end    
+
+        for (b =0;b<3;b=b+1) begin
+            SNSR_checksum = SNSR_checksum ^ SNSR_data[b];
+        end
+
+        SNSR_data[3] = SNSR_checksum;
     end
 
 
@@ -136,7 +150,7 @@ module UART_Controlller_ACU_Plank_tb();
         .o_inhibit_7(o_inhibit_7)
     );
 
-    PLANK #(.temp(24'h2020DD)) PLANK1_module_inst      // VCC,GND - 32*c 
+    PLANK #(.temp(24'h2050DD)) PLANK1_module_inst      // VCC,GND - 32*c 
     (
         .i_clk(i_clk_100),
         .i_rst(i_rst_n_1),
@@ -144,7 +158,7 @@ module UART_Controlller_ACU_Plank_tb();
         .o_tx_serial(i_fdbck_plank[0])
     );
 
-    PLANK #(.temp(24'h1919DD)) PLANK2_module_inst   // VCC,GND - 25*c
+    PLANK #(.temp(24'h1920DD)) PLANK2_module_inst   // VCC,GND - 25*c
     (
         .i_clk(i_clk_100),
         .i_rst(i_rst_n_1),
@@ -152,7 +166,7 @@ module UART_Controlller_ACU_Plank_tb();
         .o_tx_serial(i_fdbck_plank[1])
     );
 
-    PLANK #(.temp(24'h1E1EDD)) PLANK3_module_inst  // VCC,GND - 30*c
+    PLANK #(.temp(24'h1E22DD)) PLANK3_module_inst  // VCC,GND - 30*c
             (
                 .i_clk(i_clk_100),
                 .i_rst(i_rst_n_1),
@@ -160,7 +174,7 @@ module UART_Controlller_ACU_Plank_tb();
                 .o_tx_serial(i_fdbck_plank[2])
             );
 
-    PLANK #(.temp(24'h2828DD)) PLANK4_module_inst  // VCC,GND - 40*c
+    PLANK #(.temp(24'h282DDD)) PLANK4_module_inst  // VCC,GND - 40*c
     (
         .i_clk(i_clk_100),
         .i_rst(i_rst_n_1),
@@ -168,7 +182,7 @@ module UART_Controlller_ACU_Plank_tb();
         .o_tx_serial(i_fdbck_plank[3])
     );
 
-    PLANK #(.temp(24'h2D2DDD)) PLANK5_module_inst  // VCC,GND - 45*c
+    PLANK #(.temp(24'h2D90DD)) PLANK5_module_inst  // VCC,GND - 45*c
             (
                 .i_clk(i_clk_100),
                 .i_rst(i_rst_n_1),
@@ -230,6 +244,15 @@ module UART_Controlller_ACU_Plank_tb();
             #(c_BIT_PERIOD);
         end
     endtask
+
+    task  SNSR_FDBCK;
+        integer o;
+        begin
+            foreach(SNSR_data[o])begin
+                UART_WRITE(SNSR_data[o]);
+            end
+        end
+    endtask 
 
     task  set_feedback;
         input[2:0] in_module;
@@ -295,7 +318,9 @@ module UART_Controlller_ACU_Plank_tb();
         i_rst_n_1 = 0;
         #50;
         i_rst_n_1 = 1;
-        #100;
+        #30000;
+        SNSR_FDBCK;
+        #1_0024240;
         // $display("Time started Change_ACU %t", $time);
         $display("Time started sending feedback %t", $time);
         #3000;
@@ -323,6 +348,8 @@ module UART_Controlller_ACU_Plank_tb();
         send_Plank(3'd5);
         wait(UART_Controlller_ACU_Plank_inst.r_ACK_FDBCK_done);
         #20000;
+        SNSR_FDBCK;
+        #3_0024240;
         $stop;
         // set_feedback(3'd0);
         // #100;

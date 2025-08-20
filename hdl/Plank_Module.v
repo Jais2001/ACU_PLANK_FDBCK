@@ -1,5 +1,6 @@
 module PLANK #(
-    parameter temp = 24'h2020DD
+    parameter temp = 25'h02020DD,
+    parameter ADC_data = 96'hACDEADBEEFDEADBEEFABAACC
 )(
     input wire i_clk,
     input wire i_rst,
@@ -61,11 +62,28 @@ module PLANK #(
     wire w_temp_ready_VCC;
 
     reg [23:0] r_VCC_GND_Temp;
+    reg[24:0]r_buff_send_Uart;
     reg r_VCC_GND_Temp_valid;
     reg [23:0] r_buff_Temp_Stats;
 
-    reg[16:0] r_FDB_Chnnl;
+    reg[24:0] r_FDB_Chnnl;
     reg r_FDBCK_pending;
+
+    reg r_ADC_valid;
+    reg r_ADC_buff_Valid;
+    reg r_ADC_pending;
+    reg r_temp_pending;
+    reg[79:0] r_ADC_data;
+    reg[87:0] r_ADC_set_data;
+    reg[95:0] r_buff_send_ADC;
+
+    reg r_request_Readback;
+
+    reg[2:0] PLANK_SM;
+    localparam PLANK_Initial = 3'd1;
+    localparam PLANK_Fdbck_Temp_send   = 3'd2;
+    localparam PLANK_Temp_Send = 3'd3;
+    localparam PLANK_ADC_send = 3'd4;
 
     assign w_rst_n = i_rst;
 
@@ -125,22 +143,41 @@ module PLANK #(
     reg r_PLANK_data_valid_buff2;
     reg r_PLANK_data_valid_buff3;
 
+    wire w_PLANK_FDBCK_data_valid;
+
     localparam send_plank_bytes = 5'd18;
     reg[17:0] r_send_counter;
-    reg[1:0] r_pulse_cal;
+    reg[1:0] r_pulse_Temp;
+    reg[2:0] r_pulse_ADC;
 
     always @(posedge i_clk or negedge w_rst_n) begin
         if (~w_rst_n) begin
             r_VCC_GND_Temp_valid <= 1'b0;
-            r_pulse_cal <= 2'd0;
+            r_pulse_Temp <= 2'd0;
         end
         else begin
-            if (r_pulse_cal < 2'd2) begin
+            if (r_pulse_Temp < 2'd2) begin
                 r_VCC_GND_Temp_valid <= 1'b0;
-                r_pulse_cal <= r_pulse_cal + 1;
+                r_pulse_Temp <= r_pulse_Temp + 1;
             end else begin
                 r_VCC_GND_Temp_valid <= 1'b1;
-                r_pulse_cal <= 2'd0;
+                r_pulse_Temp <= 2'd0;
+            end
+        end
+    end
+
+    always @(posedge i_clk or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_ADC_buff_Valid <= 1'b0;
+            r_pulse_ADC <= 3'd0;
+        end
+        else begin
+            if (r_pulse_ADC < 3'd7) begin
+                r_ADC_buff_Valid <= 1'b0;
+                r_pulse_ADC <= r_pulse_ADC + 1;
+            end else begin
+                r_ADC_buff_Valid <= 1'b1;
+                r_pulse_ADC <= 2'd0;
             end
         end
     end
@@ -159,10 +196,10 @@ module PLANK #(
 
     always @(posedge i_clk or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_FDB_Chnnl <= 17'b0;
+            r_FDB_Chnnl <= 25'b0;
         end else begin
             if (r_PLANK_data_valid_buff2) begin
-                r_FDB_Chnnl <= {r_tx_rx_sel,r_ch_power,8'hEE};
+                r_FDB_Chnnl <= {r_tx_rx_sel,r_ch_power,8'hBB,8'hEE};
             end
         end
     end
@@ -215,46 +252,67 @@ module PLANK #(
         end
     end
 
-    reg[2:0] PLANK_SM;
-    localparam PLANK_Initial = 3'd1;
-    localparam PLANK_UART_send   = 3'd2;
-    localparam PLANK_Feedbck_send = 3'd3;
-
     always @(posedge i_clk or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_send_counter <= 5'b0;
+            r_send_counter <= 4'd0;
             r_uart_tx_data      <= 0;
             r_uart_tx_valid     <= 0;
-            r_buff_Temp_Stats  <= 0;
+            r_buff_send_Uart  <= 0;
+            r_buff_send_ADC <= 0;
             PLANK_SM <= PLANK_Initial;
             r_FDBCK_pending <= 0;
+            r_temp_pending <= 0;
+            r_ADC_pending <= 1'b0;
         end else begin
             r_uart_tx_valid <= 0;
             if (r_PLANK_data_valid_buff3) begin
                 r_FDBCK_pending <= 1'b1;
+            end
+            if (r_ADC_buff_Valid) begin
+                r_ADC_pending <= 1'b1;
             end
             if (~w_uart_tx_active) begin
                 case (PLANK_SM)
                     PLANK_Initial: begin
                         PLANK_SM <= PLANK_Initial;
                         if (r_FDBCK_pending) begin
-                            PLANK_SM <= PLANK_UART_send;
+                            PLANK_SM <= PLANK_Fdbck_Temp_send;
                             r_FDBCK_pending <= 1'b0;
-                            r_buff_Temp_Stats <= r_FDB_Chnnl;
-                        end else if (r_VCC_GND_Temp_valid) begin
-                            r_buff_Temp_Stats <= temp;
-                            PLANK_SM <= PLANK_UART_send;
-                        end
+                            r_buff_send_Uart <= r_FDB_Chnnl;
+                        end else if (r_ADC_pending) begin
+                            r_buff_send_ADC <= ADC_data;
+                            r_ADC_pending <= 1'b0;
+                            PLANK_SM <= PLANK_ADC_send;
+                        end 
                     end
-                    PLANK_UART_send: begin
-                        if (r_send_counter < 5'd3) begin
+                    PLANK_Fdbck_Temp_send: begin
+                        if (r_send_counter < 3'd4) begin
                             r_uart_tx_valid <= 1;
-                            r_uart_tx_data  <= r_buff_Temp_Stats[7:0];
-                            r_buff_Temp_Stats <= (r_buff_Temp_Stats >> 8);
+                            r_uart_tx_data  <= r_buff_send_Uart[7:0];
+                            r_buff_send_Uart <= (r_buff_send_Uart >> 8);
                             r_send_counter <= r_send_counter + 1;
                         end else begin
                             r_send_counter <= 0;
                             PLANK_SM <= PLANK_Initial;
+                        end
+                    end
+                    PLANK_ADC_send : begin
+                        if (r_send_counter < 4'd12) begin
+                            r_uart_tx_valid <= 1;
+                            r_uart_tx_data  <= r_buff_send_ADC[7:0];
+                            r_buff_send_ADC <= (r_buff_send_ADC >> 8);
+                            r_send_counter <= r_send_counter + 1;
+                        end else begin
+                            r_send_counter <= 0;
+                            PLANK_SM <= PLANK_Temp_Send;
+                        end
+                    end
+                    PLANK_Temp_Send : begin
+                        PLANK_SM <= PLANK_Temp_Send;
+                        if (r_VCC_GND_Temp_valid) begin
+                            r_buff_send_Uart <= temp;
+                            r_temp_pending <= 1'b0;
+                            PLANK_SM <= PLANK_Fdbck_Temp_send;
                         end
                     end
                     default: begin
@@ -264,6 +322,56 @@ module PLANK #(
             end
         end
     end
+
+    // reg[2:0] PLANK_SM;
+    // localparam PLANK_Initial = 3'd1;
+    // localparam PLANK_UART_send   = 3'd2;
+    // localparam PLANK_Feedbck_send = 3'd3;
+
+    // always @(posedge i_clk or negedge w_rst_n) begin
+    //     if (~w_rst_n) begin
+    //         r_send_counter <= 5'b0;
+    //         r_uart_tx_data      <= 0;
+    //         r_uart_tx_valid     <= 0;
+    //         r_buff_Temp_Stats  <= 0;
+    //         PLANK_SM <= PLANK_Initial;
+    //         r_FDBCK_pending <= 0;
+    //     end else begin
+    //         r_uart_tx_valid <= 0;
+    //         if (r_PLANK_data_valid_buff3) begin
+    //             r_FDBCK_pending <= 1'b1;
+    //         end
+    //         if (~w_uart_tx_active) begin
+    //             case (PLANK_SM)
+    //                 PLANK_Initial: begin
+    //                     PLANK_SM <= PLANK_Initial;
+    //                     if (r_FDBCK_pending) begin
+    //                         PLANK_SM <= PLANK_UART_send;
+    //                         r_FDBCK_pending <= 1'b0;
+    //                         r_buff_Temp_Stats <= r_FDB_Chnnl;
+    //                     end else if (r_VCC_GND_Temp_valid) begin
+    //                         r_buff_Temp_Stats <= temp;
+    //                         PLANK_SM <= PLANK_UART_send;
+    //                     end
+    //                 end
+    //                 PLANK_UART_send: begin
+    //                     if (r_send_counter < 5'd3) begin
+    //                         r_uart_tx_valid <= 1;
+    //                         r_uart_tx_data  <= r_buff_Temp_Stats[7:0];
+    //                         r_buff_Temp_Stats <= (r_buff_Temp_Stats >> 8);
+    //                         r_send_counter <= r_send_counter + 1;
+    //                     end else begin
+    //                         r_send_counter <= 0;
+    //                         PLANK_SM <= PLANK_Initial;
+    //                     end
+    //                 end
+    //                 default: begin
+    //                     PLANK_SM <= PLANK_Initial;
+    //                 end
+    //             endcase
+    //         end
+    //     end
+    // end
 
 
 endmodule

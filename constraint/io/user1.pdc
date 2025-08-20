@@ -6,7 +6,7 @@
 
 # Family: SmartFusion2 , Die: M2S090TS , Package: 676 FBGA
 
-# Date generated: Mon Apr  7 20:30:33 2025 
+# Date generated: Tue Aug 19 13:25:59 2025 
 
 
 # 
@@ -103,6 +103,12 @@ set_io i_phase_180    \
 
 set_io i_rx_serial    \
     -pinname T5       \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_usr_rst      \
+    -pinname AF17     \
     -fixed yes        \
     -DIRECTION INPUT
 
@@ -342,7 +348,7 @@ set_io o_attn_31p5_4   \
 
 
 set_io o_attn_31p5_5   \
-    -pinname J12        \
+    -pinname J12       \
     -fixed yes         \
     -DIRECTION OUTPUT
 
@@ -598,9 +604,4 @@ set_io o_tx_serial_fdbck  \
 #Ports using Dedicated Pins
 
 #
-
-#set_io DEVRST_N       \
-#    -pinname U16      \
-#    -DIRECTION INPUT
-
 
