@@ -350,7 +350,7 @@ module UART_Controlller_ACU_Plank_tb();
         #20000;
         SNSR_FDBCK;
         #3_0024240;
-        $stop;
+        // $stop;
         // set_feedback(3'd0);
         // #100;
         // set_feedback(3'd7);

@@ -69,7 +69,6 @@ module UART_Controlller_ACU_Plank (
     wire w_rst_n;
     
     wire [7:0] w_uart_rx_data;
-    wire w_uart_rx_error;
     wire w_uart_rx_valid;
 
     reg[7:0] r_uart_rx_data;
@@ -89,10 +88,9 @@ module UART_Controlller_ACU_Plank (
     reg  r_BITE_CNTRL;
     reg  r_SUB_ARRAY;
     reg [2:0] r_Plank_module;
+    reg[7:0] r_buff_Plank_module;
 
-    reg[3:0]r_Plank_count;
-
-    reg[4:0] r_ADC_Temp_CNTR;
+    reg[6:0]r_ACK_send;
 
     reg[151:0] r_send_plank;
     reg[4:0] r_send_counter;
@@ -112,7 +110,7 @@ module UART_Controlller_ACU_Plank (
     reg r_PLANK_data_valid_buff_1;
     reg r_PLANK_data_valid_buff_2;
     reg r_PLANK_data_valid_buff_3;
-    reg r_PLANK_data_valid_buff_28;
+    // reg r_PLANK_data_valid_buff_28;
 
     wire w_rst_PLANK;
 
@@ -120,8 +118,11 @@ module UART_Controlller_ACU_Plank (
     wire [7:0] w_uart_rx_data_fdbck_Plank[7:0];
     wire [7:0]w_uart_rx_valid_fdbck_Plank;
 
-    reg[7:0] r_plank_data_module;
-    reg r_plank_module_valid;
+    reg[7:0] r_plank_data_module[7:0];
+    reg [7:0]r_plank_module_valid;
+
+    reg r_ACK_plank_module_valid; 
+    reg[7:0] r_ACK_plank_data_module;  
 
     reg[29:0] r_shift_PLANK_valid;
 
@@ -229,7 +230,6 @@ module UART_Controlller_ACU_Plank (
     localparam SNSR_LENGTH = 3; // Total packet size In bytes inluding Identifier,data,checksum
     wire [(SNSR_LENGTH*8) - 1 : 0] w_SNSR_data;
     wire w_SNSR_data_valid;
-    reg r_SNSR_data_valid;
 
     // Sensor Readback identifier
     UART_packet_identifier #(
@@ -286,6 +286,10 @@ module UART_Controlller_ACU_Plank (
         end
     end
 
+    always @(posedge i_clk_100) begin
+        r_buff_Plank_module <= r_Plank_module;
+    end
+
     always @(posedge i_clk_100 or negedge w_rst_n) begin // for getting the delayed PLANK data valid signal
         if (~w_rst_n) begin
             r_shift_PLANK_valid <= 30'd0;
@@ -297,7 +301,7 @@ module UART_Controlller_ACU_Plank (
     assign r_PLANK_data_valid_buff_1 = r_shift_PLANK_valid[0];
     assign r_PLANK_data_valid_buff_2 = r_shift_PLANK_valid[1];
     assign r_PLANK_data_valid_buff_3 = r_shift_PLANK_valid[2];
-    assign r_PLANK_data_valid_buff_28 = r_shift_PLANK_valid[27]; // 28th delayed cycle for getting ACK from PLANK
+    // assign r_PLANK_data_valid_buff_28 = r_shift_PLANK_valid[27]; // 28th delayed cycle for getting ACK from PLANK
 
     assign w_checksum = r_plank_data[15:8]  ^ r_plank_data[23:16] ^
                         r_plank_data[31:24] ^ r_plank_data[39:32] ^ r_plank_data[47:40] ^
@@ -322,94 +326,728 @@ module UART_Controlller_ACU_Plank (
     localparam SM_Fdbck_ACK_1 = 3'd0;
     localparam SM_Fdbck_ACK_2 = 3'd1;
     localparam SM_Fdbck_ACK_3 = 3'd2;
+    localparam SM_Fdbck_ACK_4 = 3'd3;
 
     reg[2:0] SM_Sensor_Fdcbk;
-    localparam SM_Sensor_STRT = 3'd0;
+    localparam SM_Sensor_wait = 3'd0;
     localparam SM_Sensor_1 = 3'd1;
     localparam SM_INCT_Cnt = 3'd2;
-    localparam SM_SNSR_Get = 3'd3;
+    localparam SM_SNSR_STRT = 3'd3;
     localparam SM_PLNK_INCRT = 3'd4;
     localparam SM_Delay_State = 3'd5;
 
     always @(posedge i_clk_100 or negedge w_rst_n) begin // buffering 
         if (~w_rst_n) begin
             r_plank_module_valid <= 1'd0;
-            r_plank_data_module        <= 8'd0;
+            // r_plank_data_module        <= 8'd0;
+            r_ACK_plank_module_valid   <= 1'd0;
+            r_ACK_plank_data_module   <= 8'd0; 
         end else begin
-            if (r_ACK_FDBCK_done) begin
-                r_plank_module_valid <= w_uart_rx_valid_fdbck_Plank[r_Plank_module];
-                r_plank_data_module  <= w_uart_rx_data_fdbck_Plank[r_Plank_module];
-            end else begin
-                r_plank_module_valid <= w_uart_rx_valid_fdbck_Plank[r_Plank_count];
-                r_plank_data_module  <= w_uart_rx_data_fdbck_Plank[r_Plank_count];
-            end
+            // if (r_ACK_FDBCK_done) begin
+            //     r_ACK_plank_module_valid <= w_uart_rx_valid_fdbck_Plank[r_Plank_module];
+            //     r_ACK_plank_data_module  <= w_uart_rx_data_fdbck_Plank[r_Plank_module];
+            // end else begin
+                r_plank_module_valid[0] <= w_uart_rx_valid_fdbck_Plank[0];
+                r_plank_data_module[0]  <= w_uart_rx_data_fdbck_Plank[0];
+
+                r_plank_module_valid[1] <= w_uart_rx_valid_fdbck_Plank[1];
+                r_plank_data_module[1]  <= w_uart_rx_data_fdbck_Plank[1];
+
+                r_plank_module_valid[2] <= w_uart_rx_valid_fdbck_Plank[2];
+                r_plank_data_module[2]  <= w_uart_rx_data_fdbck_Plank[2];
+
+                r_plank_module_valid[3] <= w_uart_rx_valid_fdbck_Plank[3];
+                r_plank_data_module[3]  <= w_uart_rx_data_fdbck_Plank[3];
+
+                r_plank_module_valid[4] <= w_uart_rx_valid_fdbck_Plank[4];
+                r_plank_data_module[4]  <= w_uart_rx_data_fdbck_Plank[4];
+
+                r_plank_module_valid[5] <= w_uart_rx_valid_fdbck_Plank[5];
+                r_plank_data_module[5]  <= w_uart_rx_data_fdbck_Plank[5];
+
+                r_plank_module_valid[6] <= w_uart_rx_valid_fdbck_Plank[6];
+                r_plank_data_module[6]  <= w_uart_rx_data_fdbck_Plank[6];
+
+                r_plank_module_valid[7] <= w_uart_rx_valid_fdbck_Plank[7];
+                r_plank_data_module[7]  <= w_uart_rx_data_fdbck_Plank[7];       
+            // end
         end
     end
 
-    reg r_start_data;
+    reg r_plank1_done;
+    reg r_plank2_done;
+    reg r_plank3_done;
+    reg r_plank4_done;
+    reg r_plank5_done;
+    reg r_plank6_done;
+    reg r_plank7_done;
+    reg r_plank8_done;
+
+    reg r_plank1_pending_done;
+    reg r_plank2_pending_done;
+    reg r_plank3_pending_done;
+    reg r_plank4_pending_done;
+    reg r_plank5_pending_done;
+    reg r_plank6_pending_done;
+    reg r_plank7_pending_done;
+    reg r_plank8_pending_done;
+
+    reg[4:0] r_plank1_cnt;
+    reg[4:0] r_plank2_cnt;
+    reg[4:0] r_plank3_cnt;
+    reg[4:0] r_plank4_cnt;
+    reg[4:0] r_plank5_cnt;
+    reg[4:0] r_plank6_cnt;
+    reg[4:0] r_plank7_cnt;
+    reg[4:0] r_plank8_cnt;
+
+    reg[103:0]r_PLANK1_SNSR_data;
+    reg[103:0]r_PLANK2_SNSR_data;
+    reg[103:0]r_PLANK3_SNSR_data;
+    reg[103:0]r_PLANK4_SNSR_data;
+    reg[103:0]r_PLANK5_SNSR_data;
+    reg[103:0]r_PLANK6_SNSR_data;
+    reg[103:0]r_PLANK7_SNSR_data;
+    reg[103:0]r_PLANK8_SNSR_data;
+
+    reg[903:0] r_PLNK_all_data;
+    reg[903:0] r_PLNK_buff_all_data;
+
+
+    reg[3:0] RDBCK_Pl1;
+    localparam PL1_RFRSH_1 = 4'd0;
+    localparam PL1_SM2 = 4'd1;
+    localparam PL1_SM3 = 4'd2;
+    localparam PL1_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl2;
+    localparam PL2_RFRSH_1 = 4'd0;
+    localparam PL2_SM2 = 4'd1;
+    localparam PL2_SM3 = 4'd2;
+    localparam PL2_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl3;
+    localparam PL3_RFRSH_1 = 4'd0;
+    localparam PL3_SM2 = 4'd1;
+    localparam PL3_SM3 = 4'd2;
+    localparam PL3_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl4;
+    localparam PL4_RFRSH_1 = 4'd0;
+    localparam PL4_SM2 = 4'd1;
+    localparam PL4_SM3 = 4'd2;
+    localparam PL4_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl5;
+    localparam PL5_RFRSH_1 = 4'd0;
+    localparam PL5_SM2 = 4'd1;
+    localparam PL5_SM3 = 4'd2;
+    localparam PL5_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl6;
+    localparam PL6_RFRSH_1 = 4'd0;
+    localparam PL6_SM2 = 4'd1;
+    localparam PL6_SM3 = 4'd2;
+    localparam PL6_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl7;
+    localparam PL7_RFRSH_1 = 4'd0;
+    localparam PL7_SM2 = 4'd1;
+    localparam PL7_SM3 = 4'd2;
+    localparam PL7_RFRSH_2 = 4'd3;
+
+    reg[3:0] RDBCK_Pl8;
+    localparam PL8_RFRSH_1 = 4'd0;
+    localparam PL8_SM2 = 4'd1;
+    localparam PL8_SM3 = 4'd2;
+    localparam PL8_RFRSH_2 = 4'd3;
+
+    reg[31:0] PL_1_Time_out;
+    reg[31:0] PL_2_Time_out;
+    reg[31:0] PL_3_Time_out;
+    reg[31:0] PL_4_Time_out;
+    reg[31:0] PL_5_Time_out;
+    reg[31:0] PL_6_Time_out;
+    reg[31:0] PL_7_Time_out;
+    reg[31:0] PL_8_Time_out;
 
     always @(posedge i_clk_100 or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_start_data <= 1'b0;
+            r_plank1_done <= 1'b0;
+            r_PLANK1_SNSR_data <= 0;
+            PL_1_Time_out <= 0;
+            r_plank1_cnt <= 0;
+            RDBCK_Pl1 <= PL1_RFRSH_1;
         end else begin
-            r_start_data <= 1'b0;
-            if ((r_plank_data_module == 8'hCC) && r_plank_module_valid) begin
-                r_start_data <= 1'b1;
+            r_plank1_done <= 1'b0;
+
+            case (RDBCK_Pl1)
+                PL1_RFRSH_1: begin
+                    RDBCK_Pl1 <= PL1_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl1 <= PL1_RFRSH_2;
+                    end
+                end
+                PL1_RFRSH_2 : begin
+                    PL_1_Time_out <= PL_1_Time_out + 1'b1;
+                    if (PL_1_Time_out > 32'd1110000) begin
+                        RDBCK_Pl1 <= PL1_SM3;
+                        r_PLANK1_SNSR_data <= 0;
+                    end
+                    if ((r_plank_data_module[0] == 8'hCC) && r_plank_module_valid[0]) begin
+                        RDBCK_Pl1 <= PL1_SM2;
+                        PL_1_Time_out <= 0;
+                        r_PLANK1_SNSR_data <= 0;
+                    end 
+                end
+                PL1_SM2 : begin
+                    if (r_plank_module_valid[0])begin
+                        r_PLANK1_SNSR_data <= (r_PLANK1_SNSR_data << 8) | r_plank_data_module[0];
+                        r_plank1_cnt <= r_plank1_cnt + 1'b1;
+                    end 
+                    if (r_plank1_cnt < 5'd13) begin
+                        RDBCK_Pl1 <= PL1_SM2;
+                    end else begin
+                        RDBCK_Pl1 <= PL1_SM3;
+                        r_plank1_cnt <= 5'd0;
+                    end
+                end 
+                PL1_SM3 : begin
+                    r_plank1_done <= 1'b1;
+                    RDBCK_Pl1 <= PL1_RFRSH_1;
+                    PL_1_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl1 <= PL1_RFRSH_1;
+                end
+            endcase
+        end
+    end    
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank2_done <= 1'b0;
+            r_PLANK2_SNSR_data <= 0;
+            r_plank2_cnt <= 0;
+            PL_2_Time_out <= 0;
+            RDBCK_Pl2 <= PL2_RFRSH_1;
+        end else begin
+            r_plank2_done <= 1'b0;
+
+            case (RDBCK_Pl2)
+                PL2_RFRSH_1: begin
+                    RDBCK_Pl2 <= PL2_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl2 <= PL2_RFRSH_2;
+                    end
+                end
+                PL2_RFRSH_2 : begin
+                    PL_2_Time_out <= PL_2_Time_out + 1'b1;
+                    if (PL_2_Time_out > 32'd1110000) begin
+                        RDBCK_Pl2 <= PL2_SM3;
+                        r_PLANK2_SNSR_data <= 0;
+                    end
+                    if ((r_plank_data_module[1] == 8'hCC) && r_plank_module_valid[1]) begin
+                        RDBCK_Pl2 <= PL2_SM2;
+                        PL_2_Time_out <= 0;
+                        r_PLANK2_SNSR_data <= 0;
+                    end 
+                end
+                PL2_SM2 : begin
+                    if (r_plank_module_valid[1])begin
+                        r_PLANK2_SNSR_data <= (r_PLANK2_SNSR_data << 8) | r_plank_data_module[1];
+                        r_plank2_cnt <= r_plank2_cnt + 1'b1;
+                    end 
+                    if (r_plank2_cnt < 5'd13) begin
+                        RDBCK_Pl2 <= PL2_SM2;
+                    end else begin
+                        RDBCK_Pl2 <= PL2_SM3;
+                        r_plank2_cnt <= 5'd0;
+                    end
+                end 
+                PL2_SM3 : begin
+                    r_plank2_done <= 1'b1;
+                    PL_2_Time_out <= 0;
+                    RDBCK_Pl2 <= PL2_RFRSH_1;
+                end
+                default: begin
+                    RDBCK_Pl2 <= PL2_RFRSH_1;
+                end
+            endcase
+        end
+    end    
+
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank3_done <= 1'b0;
+            r_PLANK3_SNSR_data <= 0;
+            r_plank3_cnt <= 0;
+            PL_3_Time_out <= 0;
+            RDBCK_Pl3 <= PL3_RFRSH_1;
+        end else begin
+            r_plank3_done <= 1'b0;
+
+            case (RDBCK_Pl3)
+                PL3_RFRSH_1: begin
+                    RDBCK_Pl3 <= PL3_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl3 <= PL3_RFRSH_2;
+                    end
+                end
+                PL3_RFRSH_2 : begin
+                    PL_3_Time_out <= PL_3_Time_out + 1'b1;
+
+                    if (PL_3_Time_out > 32'd1110000) begin
+                        RDBCK_Pl3 <= PL3_SM3;
+                        r_PLANK3_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[2] == 8'hCC) && r_plank_module_valid[2]) begin
+                        RDBCK_Pl3 <= PL3_SM2;
+                        r_PLANK3_SNSR_data <= 0;
+                        PL_3_Time_out <= 0;
+                    end 
+                end
+                PL3_SM2 : begin
+                    if (r_plank_module_valid[2])begin
+                        r_PLANK3_SNSR_data <= (r_PLANK3_SNSR_data << 8) | r_plank_data_module[2];
+                        r_plank3_cnt <= r_plank3_cnt + 1'b1;
+                    end 
+                    if (r_plank3_cnt < 5'd13) begin
+                        RDBCK_Pl3 <= PL3_SM2;
+                    end else begin
+                        RDBCK_Pl3 <= PL3_SM3;
+                        r_plank3_cnt <= 5'd0;
+                    end
+                end 
+                PL3_SM3 : begin
+                    r_plank3_done <= 1'b1;
+                    PL_3_Time_out <= 0;
+                    RDBCK_Pl3 <= PL3_RFRSH_1;
+                end
+                default: begin
+                    RDBCK_Pl3 <= PL3_RFRSH_1;
+                end
+            endcase
+        end
+    end    
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank4_done <= 1'b0;
+            r_PLANK4_SNSR_data <= 0;
+            r_plank4_cnt <= 0;
+            PL_4_Time_out <= 0;
+            RDBCK_Pl4 <= PL4_RFRSH_1;
+        end else begin
+            r_plank4_done <= 1'b0;
+            case (RDBCK_Pl4)
+                PL4_RFRSH_1 : begin
+                    RDBCK_Pl4 <= PL4_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl4 <= PL4_RFRSH_2;
+                    end
+                end
+                PL4_RFRSH_2 : begin
+                    PL_4_Time_out <= PL_4_Time_out + 1'b1;
+
+                    if (PL_4_Time_out > 32'd1110000) begin
+                        RDBCK_Pl4 <= PL4_SM3;
+                        r_PLANK4_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[3] == 8'hCC) && r_plank_module_valid[3]) begin
+                        PL_4_Time_out <= 0;
+                        r_PLANK4_SNSR_data <= 0;
+                        RDBCK_Pl4 <= PL4_SM2;
+                    end 
+                end
+                PL4_SM2 : begin
+                    if (r_plank_module_valid[3])begin
+                        r_PLANK4_SNSR_data <= (r_PLANK4_SNSR_data << 8) | r_plank_data_module[3];
+                        r_plank4_cnt <= r_plank4_cnt + 1'b1;
+                    end 
+                    if (r_plank4_cnt < 5'd13) begin
+                        RDBCK_Pl4 <= PL4_SM2;
+                    end else begin
+                        RDBCK_Pl4 <= PL4_SM3;
+                        r_plank4_cnt <= 5'd0;
+                    end
+                end 
+                PL4_SM3 : begin
+                    r_plank4_done <= 1'b1;
+                    RDBCK_Pl4 <= PL4_RFRSH_1;
+                    PL_4_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl4 <= PL4_RFRSH_1;
+                end
+            endcase
+        end
+    end    
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank5_done <= 1'b0;
+            r_PLANK5_SNSR_data <= 0;
+            r_plank5_cnt <= 0;
+            PL_5_Time_out <= 0;
+            RDBCK_Pl5 <= PL5_RFRSH_1;
+        end else begin
+            r_plank5_done <= 1'b0;
+            case (RDBCK_Pl5)
+                PL5_RFRSH_1 : begin
+                    RDBCK_Pl5 <= PL5_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl5 <= PL5_RFRSH_2;
+                    end
+                end
+                PL5_RFRSH_2 : begin
+                    PL_5_Time_out <= PL_5_Time_out + 1'b1;
+
+                    if (PL_5_Time_out > 32'd1110000) begin
+                        RDBCK_Pl5 <= PL5_SM3;
+                        r_PLANK5_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[4] == 8'hCC) && r_plank_module_valid[4]) begin
+                        PL_5_Time_out <= 0;
+                        r_PLANK5_SNSR_data <= 0;
+                        RDBCK_Pl5 <= PL5_SM2;
+                    end 
+                end
+                PL5_SM2 : begin
+                    if (r_plank_module_valid[4])begin
+                        r_PLANK5_SNSR_data <= (r_PLANK5_SNSR_data << 8) | r_plank_data_module[4];
+                        r_plank5_cnt <= r_plank5_cnt + 1'b1;
+                    end 
+                    if (r_plank5_cnt < 5'd13) begin
+                        RDBCK_Pl5 <= PL5_SM2;
+                    end else begin
+                        RDBCK_Pl5 <= PL5_SM3;
+                        r_plank5_cnt <= 5'd0;
+                    end
+                end 
+                PL5_SM3 : begin
+                    r_plank5_done <= 1'b1;
+                    RDBCK_Pl5 <= PL5_RFRSH_1;
+                    PL_5_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl5 <= PL5_RFRSH_1;
+                end
+            endcase
+        end
+    end 
+
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank6_done <= 1'b0;
+            r_PLANK6_SNSR_data <= 0;
+            r_plank6_cnt <= 0;
+            PL_6_Time_out <= 0;
+            RDBCK_Pl6 <= PL6_RFRSH_1;
+        end else begin
+            r_plank6_done <= 1'b0;
+            case (RDBCK_Pl6)
+                PL6_RFRSH_1 : begin
+                    RDBCK_Pl6 <= PL6_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl6 <= PL6_RFRSH_2;
+                    end
+                end
+                PL6_RFRSH_2 : begin
+                    PL_6_Time_out <= PL_6_Time_out + 1'b1;
+
+                    if (PL_6_Time_out > 32'd1110000) begin
+                        RDBCK_Pl6 <= PL6_SM3;
+                        r_PLANK6_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[5] == 8'hCC) && r_plank_module_valid[5]) begin
+                        PL_6_Time_out <= 0;
+                        r_PLANK6_SNSR_data <= 0;
+                        RDBCK_Pl6 <= PL6_SM2;
+                    end 
+                end
+                PL6_SM2 : begin
+                    if (r_plank_module_valid[5])begin
+                        r_PLANK6_SNSR_data <= (r_PLANK6_SNSR_data << 8) | r_plank_data_module[5];
+                        r_plank6_cnt <= r_plank6_cnt + 1'b1;
+                    end 
+                    if (r_plank6_cnt < 5'd13) begin
+                        RDBCK_Pl6 <= PL6_SM2;
+                    end else begin
+                        RDBCK_Pl6 <= PL6_SM3;
+                        r_plank6_cnt <= 5'd0;
+                    end
+                end 
+                PL6_SM3 : begin
+                    r_plank6_done <= 1'b1;
+                    RDBCK_Pl6 <= PL6_RFRSH_1;
+                    PL_6_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl6 <= PL6_RFRSH_1;
+                end
+            endcase
+        end
+    end 
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank7_done <= 1'b0;
+            r_PLANK7_SNSR_data <= 0;
+            r_plank7_cnt <= 0;
+            PL_7_Time_out <= 0;
+            RDBCK_Pl7 <= PL7_RFRSH_1;
+        end else begin
+            r_plank7_done <= 1'b0;
+            case (RDBCK_Pl7)
+                PL7_RFRSH_1 : begin
+                    RDBCK_Pl7 <= PL7_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl7 <= PL7_RFRSH_2;
+                    end
+                end
+                PL7_RFRSH_2 : begin
+                    PL_7_Time_out <= PL_7_Time_out + 1'b1;
+
+                    if (PL_7_Time_out > 32'd1110000) begin
+                        RDBCK_Pl7 <= PL7_SM3;
+                        r_PLANK7_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[6] == 8'hCC) && r_plank_module_valid[6]) begin
+                        PL_7_Time_out <= 0;
+                        r_PLANK7_SNSR_data <= 0;
+                        RDBCK_Pl7 <= PL7_SM2;
+                    end 
+                end
+                PL7_SM2 : begin
+                    if (r_plank_module_valid[6])begin
+                        r_PLANK7_SNSR_data <= (r_PLANK7_SNSR_data << 8) | r_plank_data_module[6];
+                        r_plank7_cnt <= r_plank7_cnt + 1'b1;
+                    end 
+                    if (r_plank7_cnt < 5'd13) begin
+                        RDBCK_Pl7 <= PL7_SM2;
+                    end else begin
+                        RDBCK_Pl7 <= PL7_SM3;
+                        r_plank7_cnt <= 5'd0;
+                    end
+                end 
+                PL7_SM3 : begin
+                    r_plank7_done <= 1'b1;
+                    RDBCK_Pl7 <= PL7_RFRSH_1;
+                    PL_7_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl7 <= PL7_RFRSH_1;
+                end
+            endcase
+        end
+    end 
+
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_plank8_done <= 1'b0;
+            r_PLANK8_SNSR_data <= 0;
+            r_plank8_cnt <= 0;
+            PL_8_Time_out <= 0;
+            RDBCK_Pl8 <= PL8_RFRSH_1;
+        end else begin
+            r_plank8_done <= 1'b0;
+            case (RDBCK_Pl8)
+                PL8_RFRSH_1 : begin
+                    RDBCK_Pl8 <= PL8_RFRSH_1;
+                    if (w_SNSR_data_valid) begin
+                        RDBCK_Pl8 <= PL8_RFRSH_2;
+                    end
+                end
+                PL8_RFRSH_2 : begin
+                    PL_8_Time_out <= PL_8_Time_out + 1'b1;
+
+                    if (PL_8_Time_out > 32'd1110000) begin
+                        RDBCK_Pl8 <= PL8_SM3;
+                        r_PLANK8_SNSR_data <= 0;
+                    end
+
+                    if ((r_plank_data_module[7] == 8'hCC) && r_plank_module_valid[7]) begin
+                        PL_8_Time_out <= 0;
+                        r_PLANK8_SNSR_data <= 0;
+                        RDBCK_Pl8 <= PL8_SM2;
+                    end 
+                end
+                PL8_SM2 : begin
+                    if (r_plank_module_valid[7])begin
+                        r_PLANK8_SNSR_data <= (r_PLANK8_SNSR_data << 8) | r_plank_data_module[7];
+                        r_plank8_cnt <= r_plank8_cnt + 1'b1;
+                    end 
+                    if (r_plank8_cnt < 5'd13) begin
+                        RDBCK_Pl8 <= PL8_SM2;
+                    end else begin
+                        RDBCK_Pl8 <= PL8_SM3;
+                        r_plank8_cnt <= 5'd0;
+                    end
+                end 
+                PL8_SM3 : begin
+                    r_plank8_done <= 1'b1;
+                    RDBCK_Pl8 <= PL8_RFRSH_1;
+                    PL_8_Time_out <= 0;
+                end
+                default: begin
+                    RDBCK_Pl8 <= PL8_RFRSH_1;
+                end
+            endcase
+        end
+    end 
+
+
+    reg r_all_PLNK_done;
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_all_PLNK_done <= 1'd0;
+            r_PLNK_all_data <= 0;
+        end else begin
+            r_all_PLNK_done <= 1'd0;
+
+            if (r_plank1_done) begin
+                r_plank1_pending_done <= 1'b1;
+            end
+
+            if (r_plank2_done) begin
+                r_plank2_pending_done <= 1'b1;
+            end
+
+            if (r_plank3_done) begin
+                r_plank3_pending_done <= 1'b1;
+            end
+
+            if (r_plank4_done) begin
+                r_plank4_pending_done <= 1'b1;
+            end
+
+            if (r_plank5_done) begin
+                r_plank5_pending_done <= 1'b1;
+            end
+
+            if (r_plank6_done) begin
+                r_plank6_pending_done <= 1'b1;
+            end
+
+            if (r_plank7_done) begin
+                r_plank7_pending_done <= 1'b1;
+            end
+
+            if (r_plank8_done) begin
+                r_plank8_pending_done <= 1'b1;
+            end
+
+            if (r_plank1_pending_done && r_plank2_pending_done && r_plank3_pending_done && r_plank4_pending_done && r_plank5_pending_done && r_plank6_pending_done && r_plank7_pending_done && r_plank8_pending_done) begin
+                r_PLNK_all_data <= {8'hCC,r_PLANK1_SNSR_data,8'd1,r_PLANK2_SNSR_data,8'd2,r_PLANK3_SNSR_data,8'd3,r_PLANK4_SNSR_data,8'd4,r_PLANK5_SNSR_data,8'd5,r_PLANK6_SNSR_data,8'd6,r_PLANK7_SNSR_data,8'd7,r_PLANK8_SNSR_data,8'd8};
+                r_all_PLNK_done <= 1'd1;
+                r_plank1_pending_done <= 1'b0;
+                r_plank2_pending_done <= 1'b0;
+                r_plank3_pending_done <= 1'b0;
+                r_plank4_pending_done <= 1'b0;
+                r_plank5_pending_done <= 1'b0;
+                r_plank6_pending_done <= 1'b0;
+                r_plank7_pending_done <= 1'b0;
+                r_plank8_pending_done <= 1'b0;
             end
         end
     end
+
+    reg[15:0] r_ACK_PLNK_data;
+    reg[31:0] r_buff_ACK_PLNK_data;
+    reg[2:0] r_PLNCK_send;
+    reg[2:0] r_PLNK_ACK_cnt;
+
+
+    reg[1:0]SM_ACU_RDBCK;
+    localparam ACU_SM1 = 2'd0;
+    localparam ACU_SM2 = 2'd1;
     
     always @(posedge i_clk_100 or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_Plank_count <= 4'd0;
-            SM_Sensor_Fdcbk <= SM_Sensor_STRT;
+            r_ACK_send <= 7'd0;
+            SM_Sensor_Fdcbk <= SM_Sensor_wait;
             r_ACK_FDBCK_done <= 1'b0;
-            r_SNSR_data_valid <= 1'b0;
-            r_ADC_Temp_CNTR <= 5'd0;
             r_uart_tx_valid_fdbck <= 1'b0;
             r_uart_tx_data_fdbck <= 7'd0;
             r_buff_ACK_FDBCK_done <= 1'b0;
+            r_PLNK_buff_all_data <= 0;
+            r_ACK_PLNK_data <= 15'd0;
+            r_buff_ACK_PLNK_data <= 32'd0;
+            r_ACK_FDBCK_done <= 1'b0;
+            r_PLNCK_send <= 3'd0;
+            r_PLNK_ACK_cnt <= 3'd0;
+            SM_ACU_RDBCK <= ACU_SM1;
             SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
         end else begin
             r_uart_tx_valid_fdbck <= 1'b0;
 
-            if ((w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) && w_uart_rx_valid_fdbck_Plank[r_Plank_module] )begin//w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
-                r_ACK_FDBCK_done <= 1'b1;
-            end
+            case (SM_ACU_RDBCK)
+                ACU_SM1: begin
+                    SM_ACU_RDBCK <= ACU_SM1;
+                    if (r_PLANK_data_valid_buff_2) begin
+                        SM_ACU_RDBCK <= ACU_SM2;
+                    end
+                end
+                ACU_SM2 : begin
+                    SM_ACU_RDBCK <= ACU_SM2;
+                    if ((w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) && w_uart_rx_valid_fdbck_Plank[r_Plank_module] )begin//w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
+                        r_ACK_FDBCK_done <= 1'b1;
+                        SM_ACU_RDBCK <= ACU_SM1;
+                    end
+                end
+                default: begin
+                    SM_ACU_RDBCK <= ACU_SM1;
+                end
+            endcase
 
             r_buff_ACK_FDBCK_done <= r_ACK_FDBCK_done;
 
-            if (w_SNSR_data_valid) begin
-                r_SNSR_data_valid <= 1'b1;
-            end
-
-
-            if (~w_uart_tx_active_fdbck && r_buff_ACK_FDBCK_done) begin
+            if (~w_uart_tx_active_fdbck && r_ACK_FDBCK_done) begin
                 case (SM_ACK_FDBCK)
                     SM_Fdbck_ACK_1: begin
                         SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
-                            r_uart_tx_valid_fdbck <= 1'b1;
-                            SM_ACK_FDBCK <= SM_Fdbck_ACK_2;
+                        if (w_uart_rx_valid_fdbck_Plank[r_Plank_module]) begin
+
+                            r_ACK_PLNK_data <= (r_ACK_PLNK_data << 8) | w_uart_rx_data_fdbck_Plank[r_Plank_module];
+                            r_PLNK_ACK_cnt <= r_PLNK_ACK_cnt + 1'b1;
+
+                            if (r_PLNK_ACK_cnt < 3'd1) begin
+                                SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
+                            end else begin
+                                SM_ACK_FDBCK <= SM_Fdbck_ACK_4;
+                                r_PLNK_ACK_cnt <= 3'd0;
+                            end
                         end
                     end
-                    SM_Fdbck_ACK_2 : begin
+                    SM_Fdbck_ACK_4 : begin
+                        r_buff_ACK_PLNK_data <= {8'hEE,r_ACK_PLNK_data,r_buff_Plank_module};
                         SM_ACK_FDBCK <= SM_Fdbck_ACK_2;
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
+                    end
+                    SM_Fdbck_ACK_2 : begin
+                        if (r_PLNCK_send < 3'd4) begin
+                            r_uart_tx_data_fdbck <= r_buff_ACK_PLNK_data[31:24];
+                            r_buff_ACK_PLNK_data <= (r_buff_ACK_PLNK_data << 8);
                             r_uart_tx_valid_fdbck <= 1'b1;
+                            r_PLNCK_send <= r_PLNCK_send + 1'b1;
+                            SM_ACK_FDBCK <= SM_Fdbck_ACK_2;
+                        end else begin
                             SM_ACK_FDBCK <= SM_Fdbck_ACK_3;
+                            r_PLNCK_send <= 3'd0;
                         end
                     end
                     SM_Fdbck_ACK_3 : begin
-                        SM_ACK_FDBCK <= SM_Fdbck_ACK_3;
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
-                            r_uart_tx_valid_fdbck <= 1'b1;
-                            r_ACK_FDBCK_done <= 1'b0;
-                            SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
-                        end
+                        SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
+                        r_ACK_FDBCK_done <= 1'b0;
                     end
                     default: begin
                         SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
@@ -419,48 +1057,27 @@ module UART_Controlller_ACU_Plank (
 
             if (~w_uart_tx_active_fdbck && ~r_buff_ACK_FDBCK_done) begin
                 case (SM_Sensor_Fdcbk)
-                    SM_Sensor_STRT : begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_STRT;
-                        if (r_SNSR_data_valid) begin
-                            SM_Sensor_Fdcbk <= SM_SNSR_Get;
-                            r_SNSR_data_valid <= 1'b0;
+                    SM_Sensor_wait : begin
+                        SM_Sensor_Fdcbk <= SM_Sensor_wait;
+                        if (r_all_PLNK_done) begin
+                            SM_Sensor_Fdcbk <= SM_SNSR_STRT;
+                            r_PLNK_buff_all_data <= r_PLNK_all_data;
                         end
                     end
-                    SM_SNSR_Get : begin
-                        SM_Sensor_Fdcbk <= SM_SNSR_Get;
-                        if (r_start_data) begin
-                            SM_Sensor_Fdcbk <= SM_Sensor_1;
-                        end
-                    end
-                    SM_Sensor_1: begin
-                        if (r_plank_module_valid) begin
-                            r_uart_tx_data_fdbck <= r_plank_data_module;
-                            r_ADC_Temp_CNTR <= r_ADC_Temp_CNTR + 1'b1;
+                    SM_SNSR_STRT: begin
+                        if (r_ACK_send < 7'd113) begin
+                            r_uart_tx_data_fdbck <= r_PLNK_buff_all_data[903:896];
+                            r_PLNK_buff_all_data <= (r_PLNK_buff_all_data << 8);
                             r_uart_tx_valid_fdbck <= 1'b1;
-                        end 
-                        if (r_ADC_Temp_CNTR < 5'd13) begin
-                            SM_Sensor_Fdcbk <= SM_Sensor_1;
+                            r_ACK_send <= r_ACK_send + 1'b1;
+                            SM_Sensor_Fdcbk <= SM_SNSR_STRT;
                         end else begin
-                            SM_Sensor_Fdcbk <= SM_PLNK_INCRT;
-                        end
-                    end
-                    SM_PLNK_INCRT : begin
-                        r_ADC_Temp_CNTR <= 4'd0;
-                        r_uart_tx_data_fdbck <= r_Plank_count;
-                        r_uart_tx_valid_fdbck <= 1'b1;
-                        r_Plank_count <= r_Plank_count + 1;
-                        SM_Sensor_Fdcbk <= SM_Delay_State;
-                    end
-                    SM_Delay_State : begin
-                        if (r_Plank_count < 4'd8) begin
-                            SM_Sensor_Fdcbk <= SM_SNSR_Get;
-                        end else begin
-                            r_Plank_count <= 4'd0;
-                            SM_Sensor_Fdcbk <= SM_Sensor_STRT;
+                            SM_Sensor_Fdcbk <= SM_Sensor_wait;
+                            r_ACK_send <= 7'd0;
                         end
                     end
                     default: begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_STRT;
+                        SM_Sensor_Fdcbk <= SM_Sensor_wait;
                     end
                 endcase
             end

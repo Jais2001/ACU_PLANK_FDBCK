@@ -1,6 +1,6 @@
 module PLANK #(
-    parameter temp = 25'h02020DD,
-    parameter ADC_data = 96'hACDEADBEEFDEADBEEFABAACC
+    parameter temp = 24'h2020DD,
+    parameter ADC_data = 88'hACDEADBEEFDEADBEEFABCC
 )(
     input wire i_clk,
     input wire i_rst,
@@ -62,11 +62,11 @@ module PLANK #(
     wire w_temp_ready_VCC;
 
     reg [23:0] r_VCC_GND_Temp;
-    reg[24:0]r_buff_send_Uart;
+    reg[23:0]r_buff_send_Uart;
     reg r_VCC_GND_Temp_valid;
     reg [23:0] r_buff_Temp_Stats;
 
-    reg[24:0] r_FDB_Chnnl;
+    reg[23:0] r_FDB_Chnnl;
     reg r_FDBCK_pending;
 
     reg r_ADC_valid;
@@ -75,7 +75,7 @@ module PLANK #(
     reg r_temp_pending;
     reg[79:0] r_ADC_data;
     reg[87:0] r_ADC_set_data;
-    reg[95:0] r_buff_send_ADC;
+    reg[87:0] r_buff_send_ADC;
 
     reg r_request_Readback;
 
@@ -196,10 +196,10 @@ module PLANK #(
 
     always @(posedge i_clk or negedge w_rst_n) begin
         if (~w_rst_n) begin
-            r_FDB_Chnnl <= 25'b0;
+            r_FDB_Chnnl <= 24'b0;
         end else begin
             if (r_PLANK_data_valid_buff2) begin
-                r_FDB_Chnnl <= {r_tx_rx_sel,r_ch_power,8'hBB,8'hEE};
+                r_FDB_Chnnl <= {r_tx_rx_sel,r_ch_power,8'hEE};
             end
         end
     end
@@ -286,7 +286,7 @@ module PLANK #(
                         end 
                     end
                     PLANK_Fdbck_Temp_send: begin
-                        if (r_send_counter < 3'd4) begin
+                        if (r_send_counter < 3'd3) begin
                             r_uart_tx_valid <= 1;
                             r_uart_tx_data  <= r_buff_send_Uart[7:0];
                             r_buff_send_Uart <= (r_buff_send_Uart >> 8);
@@ -297,7 +297,7 @@ module PLANK #(
                         end
                     end
                     PLANK_ADC_send : begin
-                        if (r_send_counter < 4'd12) begin
+                        if (r_send_counter < 4'd11) begin
                             r_uart_tx_valid <= 1;
                             r_uart_tx_data  <= r_buff_send_ADC[7:0];
                             r_buff_send_ADC <= (r_buff_send_ADC >> 8);
