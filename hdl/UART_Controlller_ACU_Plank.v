@@ -112,6 +112,11 @@ module UART_Controlller_ACU_Plank (
     reg r_PLANK_data_valid_buff_3;
     // reg r_PLANK_data_valid_buff_28;
 
+    reg r_ACU_data_valid_buff_1;
+    reg r_ACU_data_valid_buff_2;
+    reg r_ACU_data_valid_buff_3;
+    reg r_ACU_data_valid_buff_4;
+
     wire w_rst_PLANK;
 
     wire [7:0]w_rx_serial_fdbck_Plank;
@@ -125,6 +130,7 @@ module UART_Controlller_ACU_Plank (
     reg[7:0] r_ACK_plank_data_module;  
 
     reg[29:0] r_shift_PLANK_valid;
+    reg[29:0] r_shift_ACU_data_valid;
 
     uart_rx #(.CLKS_PER_BIT(CLKS_PER_BIT)) uart_rx_inst
     (
@@ -230,6 +236,7 @@ module UART_Controlller_ACU_Plank (
     localparam SNSR_LENGTH = 3; // Total packet size In bytes inluding Identifier,data,checksum
     wire [(SNSR_LENGTH*8) - 1 : 0] w_SNSR_data;
     wire w_SNSR_data_valid;
+    reg r_buff_SNSR_data_valid;
 
     // Sensor Readback identifier
     UART_packet_identifier #(
@@ -245,6 +252,10 @@ module UART_Controlller_ACU_Plank (
         .o_data(w_SNSR_data),
         .o_data_valid(w_SNSR_data_valid)
     );
+
+    always @(posedge i_clk_100) begin
+        r_buff_SNSR_data_valid <= w_SNSR_data_valid;
+    end
 
     always @(posedge i_clk_100 or negedge w_rst_n) begin
             if(w_rst_n == 1'b0) begin 
@@ -269,6 +280,32 @@ module UART_Controlller_ACU_Plank (
                     r_BITE_CNTRL    <= w_ACU_data[40];
                     r_SUB_ARRAY     <= w_ACU_data[41];
             end
+        end
+    end
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin // for getting the delayed ACU data valid signal
+        if (~w_rst_n) begin
+            r_shift_ACU_data_valid <= 30'd0;
+        end else begin
+            r_shift_ACU_data_valid <= (r_shift_ACU_data_valid << 1) | w_ACU_data_valid;
+        end
+    end
+
+    assign r_ACU_data_valid_buff_1 = r_shift_ACU_data_valid[0];
+    assign r_ACU_data_valid_buff_2 = r_shift_ACU_data_valid[1];
+    assign r_ACU_data_valid_buff_3 = r_shift_ACU_data_valid[2];
+    assign r_ACU_data_valid_buff_4 = r_shift_ACU_data_valid[3];
+
+    reg[15:0] r_ACU_RDBCK;
+    reg[15:0] r_ACU_buff_RDBCK;
+
+    always @(posedge i_clk_100 or negedge w_rst_n) begin
+        if (~w_rst_n) begin
+            r_ACU_RDBCK <= 0;
+        end else begin
+            if (r_ACU_data_valid_buff_2) begin 
+                r_ACU_RDBCK       <= {r_enable,r_BITE_CNTRL,r_SUB_ARRAY,8'hBB};                              
+            end 
         end
     end
 
@@ -320,7 +357,7 @@ module UART_Controlller_ACU_Plank (
     localparam SM_4 = 3'd3;
 
     reg r_ACK_FDBCK_done;
-    reg r_buff_ACK_FDBCK_done;
+    reg r_pending_ACU_done;
 
     reg[1:0] SM_ACK_FDBCK;
     localparam SM_Fdbck_ACK_1 = 3'd0;
@@ -336,43 +373,61 @@ module UART_Controlller_ACU_Plank (
     localparam SM_PLNK_INCRT = 3'd4;
     localparam SM_Delay_State = 3'd5;
 
-    always @(posedge i_clk_100 or negedge w_rst_n) begin // buffering 
-        if (~w_rst_n) begin
-            r_plank_module_valid <= 1'd0;
-            // r_plank_data_module        <= 8'd0;
-            r_ACK_plank_module_valid   <= 1'd0;
-            r_ACK_plank_data_module   <= 8'd0; 
-        end else begin
-            // if (r_ACK_FDBCK_done) begin
-            //     r_ACK_plank_module_valid <= w_uart_rx_valid_fdbck_Plank[r_Plank_module];
-            //     r_ACK_plank_data_module  <= w_uart_rx_data_fdbck_Plank[r_Plank_module];
-            // end else begin
-                r_plank_module_valid[0] <= w_uart_rx_valid_fdbck_Plank[0];
-                r_plank_data_module[0]  <= w_uart_rx_data_fdbck_Plank[0];
+    // always @(posedge i_clk_100 or negedge w_rst_n) begin // buffering 
+    //     if (~w_rst_n) begin
+    //         r_plank_module_valid <= 1'd0;
+    //         // r_plank_data_module        <= 8'd0;
+    //         r_ACK_plank_module_valid   <= 1'd0;
+    //         r_ACK_plank_data_module   <= 8'd0; 
+    //     end else begin
+    //         // if (r_ACK_FDBCK_done) begin
+    //         //     r_ACK_plank_module_valid <= w_uart_rx_valid_fdbck_Plank[r_Plank_module];
+    //         //     r_ACK_plank_data_module  <= w_uart_rx_data_fdbck_Plank[r_Plank_module];
+    //         // end else begin
+    //             r_plank_module_valid[0] <= w_uart_rx_valid_fdbck_Plank[0];
+    //             r_plank_data_module[0]  <= w_uart_rx_data_fdbck_Plank[0];
 
-                r_plank_module_valid[1] <= w_uart_rx_valid_fdbck_Plank[1];
-                r_plank_data_module[1]  <= w_uart_rx_data_fdbck_Plank[1];
+    //             r_plank_module_valid[1] <= w_uart_rx_valid_fdbck_Plank[1];
+    //             r_plank_data_module[1]  <= w_uart_rx_data_fdbck_Plank[1];
 
-                r_plank_module_valid[2] <= w_uart_rx_valid_fdbck_Plank[2];
-                r_plank_data_module[2]  <= w_uart_rx_data_fdbck_Plank[2];
+    //             r_plank_module_valid[2] <= w_uart_rx_valid_fdbck_Plank[2];
+    //             r_plank_data_module[2]  <= w_uart_rx_data_fdbck_Plank[2];
 
-                r_plank_module_valid[3] <= w_uart_rx_valid_fdbck_Plank[3];
-                r_plank_data_module[3]  <= w_uart_rx_data_fdbck_Plank[3];
+    //             r_plank_module_valid[3] <= w_uart_rx_valid_fdbck_Plank[3];
+    //             r_plank_data_module[3]  <= w_uart_rx_data_fdbck_Plank[3];
 
-                r_plank_module_valid[4] <= w_uart_rx_valid_fdbck_Plank[4];
-                r_plank_data_module[4]  <= w_uart_rx_data_fdbck_Plank[4];
+    //             r_plank_module_valid[4] <= w_uart_rx_valid_fdbck_Plank[4];
+    //             r_plank_data_module[4]  <= w_uart_rx_data_fdbck_Plank[4];
 
-                r_plank_module_valid[5] <= w_uart_rx_valid_fdbck_Plank[5];
-                r_plank_data_module[5]  <= w_uart_rx_data_fdbck_Plank[5];
+    //             r_plank_module_valid[5] <= w_uart_rx_valid_fdbck_Plank[5];
+    //             r_plank_data_module[5]  <= w_uart_rx_data_fdbck_Plank[5];
 
-                r_plank_module_valid[6] <= w_uart_rx_valid_fdbck_Plank[6];
-                r_plank_data_module[6]  <= w_uart_rx_data_fdbck_Plank[6];
+    //             r_plank_module_valid[6] <= w_uart_rx_valid_fdbck_Plank[6];
+    //             r_plank_data_module[6]  <= w_uart_rx_data_fdbck_Plank[6];
 
-                r_plank_module_valid[7] <= w_uart_rx_valid_fdbck_Plank[7];
-                r_plank_data_module[7]  <= w_uart_rx_data_fdbck_Plank[7];       
-            // end
+    //             r_plank_module_valid[7] <= w_uart_rx_valid_fdbck_Plank[7];
+    //             r_plank_data_module[7]  <= w_uart_rx_data_fdbck_Plank[7];       
+    //         // end
+    //     end
+    // end
+
+    genvar r;
+    generate
+        for (r = 0; r < 8; r = r + 1) begin : GEN_PLANK
+            always @(posedge i_clk_100 or negedge w_rst_n) begin
+                if (~w_rst_n) begin
+                    r_plank_module_valid[r] <= 1'd0;
+                    r_plank_data_module[r]  <= 8'd0;
+                end else begin
+                    r_plank_module_valid[r] <= w_uart_rx_valid_fdbck_Plank[r];
+                    r_plank_data_module[r]  <= w_uart_rx_data_fdbck_Plank[r];
+                end
+            end
         end
-    end
+    endgenerate
+
+
+
 
     reg r_plank1_done;
     reg r_plank2_done;
@@ -484,7 +539,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl1)
                 PL1_RFRSH_1: begin
                     RDBCK_Pl1 <= PL1_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl1 <= PL1_RFRSH_2;
                     end
                 end
@@ -537,7 +592,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl2)
                 PL2_RFRSH_1: begin
                     RDBCK_Pl2 <= PL2_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl2 <= PL2_RFRSH_2;
                     end
                 end
@@ -591,7 +646,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl3)
                 PL3_RFRSH_1: begin
                     RDBCK_Pl3 <= PL3_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl3 <= PL3_RFRSH_2;
                     end
                 end
@@ -645,7 +700,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl4)
                 PL4_RFRSH_1 : begin
                     RDBCK_Pl4 <= PL4_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl4 <= PL4_RFRSH_2;
                     end
                 end
@@ -699,7 +754,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl5)
                 PL5_RFRSH_1 : begin
                     RDBCK_Pl5 <= PL5_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl5 <= PL5_RFRSH_2;
                     end
                 end
@@ -754,7 +809,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl6)
                 PL6_RFRSH_1 : begin
                     RDBCK_Pl6 <= PL6_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl6 <= PL6_RFRSH_2;
                     end
                 end
@@ -808,7 +863,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl7)
                 PL7_RFRSH_1 : begin
                     RDBCK_Pl7 <= PL7_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl7 <= PL7_RFRSH_2;
                     end
                 end
@@ -863,7 +918,7 @@ module UART_Controlller_ACU_Plank (
             case (RDBCK_Pl8)
                 PL8_RFRSH_1 : begin
                     RDBCK_Pl8 <= PL8_RFRSH_1;
-                    if (w_SNSR_data_valid) begin
+                    if (r_buff_SNSR_data_valid) begin
                         RDBCK_Pl8 <= PL8_RFRSH_2;
                     end
                 end
@@ -968,9 +1023,17 @@ module UART_Controlller_ACU_Plank (
     reg[2:0] r_PLNK_ACK_cnt;
 
 
-    reg[1:0]SM_ACU_RDBCK;
+    reg[1:0]SM_ACU_PLNK_RDBCK;
+    localparam ACU_PLNK_SM1 = 2'd0;
+    localparam ACU_PLNK_SM2 = 2'd1;
+
+    reg[1:0]SM_ACU_FDBCK;
     localparam ACU_SM1 = 2'd0;
     localparam ACU_SM2 = 2'd1;
+
+    reg[2:0] ACU_ACK;
+
+    reg r_pending_all_PLNK_done;
     
     always @(posedge i_clk_100 or negedge w_rst_n) begin
         if (~w_rst_n) begin
@@ -979,46 +1042,55 @@ module UART_Controlller_ACU_Plank (
             r_ACK_FDBCK_done <= 1'b0;
             r_uart_tx_valid_fdbck <= 1'b0;
             r_uart_tx_data_fdbck <= 7'd0;
-            r_buff_ACK_FDBCK_done <= 1'b0;
+            r_pending_ACU_done <= 1'b0;
             r_PLNK_buff_all_data <= 0;
             r_ACK_PLNK_data <= 15'd0;
             r_buff_ACK_PLNK_data <= 32'd0;
             r_ACK_FDBCK_done <= 1'b0;
             r_PLNCK_send <= 3'd0;
             r_PLNK_ACK_cnt <= 3'd0;
-            SM_ACU_RDBCK <= ACU_SM1;
+            SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM1;
+            r_pending_all_PLNK_done <= 1'b0;
             SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
+            SM_ACU_FDBCK <= ACU_SM1;
+            ACU_ACK <= 2'd0;
         end else begin
             r_uart_tx_valid_fdbck <= 1'b0;
 
-            case (SM_ACU_RDBCK)
-                ACU_SM1: begin
-                    SM_ACU_RDBCK <= ACU_SM1;
+            case (SM_ACU_PLNK_RDBCK)
+                ACU_PLNK_SM1: begin
+                    SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM1;
                     if (r_PLANK_data_valid_buff_2) begin
-                        SM_ACU_RDBCK <= ACU_SM2;
+                        SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM2;
                     end
                 end
-                ACU_SM2 : begin
-                    SM_ACU_RDBCK <= ACU_SM2;
-                    if ((w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) && w_uart_rx_valid_fdbck_Plank[r_Plank_module] )begin//w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
+                ACU_PLNK_SM2 : begin
+                    SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM2;
+                    if ((w_uart_rx_data_fdbck_Plank[r_buff_Plank_module] == 8'hEE) && w_uart_rx_valid_fdbck_Plank[r_buff_Plank_module] )begin//w_uart_rx_data_fdbck_Plank[r_Plank_module] == 8'hEE) begin
                         r_ACK_FDBCK_done <= 1'b1;
-                        SM_ACU_RDBCK <= ACU_SM1;
+                        SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM1;
                     end
                 end
                 default: begin
-                    SM_ACU_RDBCK <= ACU_SM1;
+                    SM_ACU_PLNK_RDBCK <= ACU_PLNK_SM1;
                 end
             endcase
 
-            r_buff_ACK_FDBCK_done <= r_ACK_FDBCK_done;
+            if (r_all_PLNK_done) begin
+                r_pending_all_PLNK_done <= 1'b1;
+            end
+
+            if (r_ACU_data_valid_buff_3) begin
+                r_pending_ACU_done <= 1'b1;
+            end
 
             if (~w_uart_tx_active_fdbck && r_ACK_FDBCK_done) begin
                 case (SM_ACK_FDBCK)
                     SM_Fdbck_ACK_1: begin
                         SM_ACK_FDBCK <= SM_Fdbck_ACK_1;
-                        if (w_uart_rx_valid_fdbck_Plank[r_Plank_module]) begin
+                        if (w_uart_rx_valid_fdbck_Plank[r_buff_Plank_module]) begin
 
-                            r_ACK_PLNK_data <= (r_ACK_PLNK_data << 8) | w_uart_rx_data_fdbck_Plank[r_Plank_module];
+                            r_ACK_PLNK_data <= (r_ACK_PLNK_data << 8) | w_uart_rx_data_fdbck_Plank[r_buff_Plank_module];
                             r_PLNK_ACK_cnt <= r_PLNK_ACK_cnt + 1'b1;
 
                             if (r_PLNK_ACK_cnt < 3'd1) begin
@@ -1055,14 +1127,41 @@ module UART_Controlller_ACU_Plank (
                 endcase
             end
 
-            if (~w_uart_tx_active_fdbck && ~r_buff_ACK_FDBCK_done) begin
+            if (~w_uart_tx_active_fdbck && r_pending_ACU_done) begin
+                case (SM_ACU_FDBCK)
+                    ACU_SM1: begin
+                        r_ACU_buff_RDBCK <= r_ACU_RDBCK;
+                        SM_ACU_FDBCK <= ACU_SM2;
+                        ACU_ACK <= 2'd0;
+                    end
+                    ACU_SM2 : begin
+                        if (ACU_ACK < 2'd2) begin
+                            r_uart_tx_data_fdbck <= r_ACU_buff_RDBCK[7:0];
+                            r_ACU_buff_RDBCK <= (r_ACU_buff_RDBCK >> 8);
+                            r_uart_tx_valid_fdbck <= 1'b1;
+                            ACU_ACK <= ACU_ACK + 1'b1;
+                        end else begin
+                            SM_ACU_FDBCK <= ACU_SM1;
+                            r_pending_ACU_done <= 1'b0;
+                            ACU_ACK <= 2'd0;
+                        end
+                    end
+                    default: begin
+                        SM_ACU_FDBCK <= ACU_SM1;
+                    end
+                endcase
+            end
+
+
+            if (~w_uart_tx_active_fdbck && r_pending_all_PLNK_done) begin
                 case (SM_Sensor_Fdcbk)
                     SM_Sensor_wait : begin
-                        SM_Sensor_Fdcbk <= SM_Sensor_wait;
-                        if (r_all_PLNK_done) begin
+                        // SM_Sensor_Fdcbk <= SM_Sensor_wait;
+                        // if (r_all_PLNK_done) begin
                             SM_Sensor_Fdcbk <= SM_SNSR_STRT;
                             r_PLNK_buff_all_data <= r_PLNK_all_data;
-                        end
+                            r_ACK_send <= 7'd0;
+                        // end
                     end
                     SM_SNSR_STRT: begin
                         if (r_ACK_send < 7'd113) begin
@@ -1073,6 +1172,7 @@ module UART_Controlller_ACU_Plank (
                             SM_Sensor_Fdcbk <= SM_SNSR_STRT;
                         end else begin
                             SM_Sensor_Fdcbk <= SM_Sensor_wait;
+                            r_pending_all_PLNK_done <= 1'b0;
                             r_ACK_send <= 7'd0;
                         end
                     end
