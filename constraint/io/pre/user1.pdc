@@ -6,7 +6,7 @@
 
 # Family: SmartFusion2 , Die: M2S090TS , Package: 676 FBGA
 
-# Date generated: Tue Aug 19 19:54:12 2025 
+# Date generated: Thu Sep 11 14:26:13 2025 
 
 
 # 
@@ -42,48 +42,56 @@ set_io i_attn_31p5    \
 set_io {i_fdbck_plank[0]}  \
     -pinname F23           \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[1]}  \
     -pinname J6            \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[2]}  \
     -pinname L3            \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[3]}  \
     -pinname G22           \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[4]}  \
     -pinname H21           \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[5]}  \
     -pinname M3            \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[6]}  \
     -pinname J7            \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
 set_io {i_fdbck_plank[7]}  \
     -pinname E22           \
     -fixed yes             \
+    -RES_PULL Up           \
     -DIRECTION INPUT
 
 
@@ -104,6 +112,7 @@ set_io i_phase_180    \
 set_io i_rx_serial    \
     -pinname T5       \
     -fixed yes        \
+    -RES_PULL Up      \
     -DIRECTION INPUT
 
 
@@ -536,54 +545,63 @@ set_io {o_reset_plank[7]}  \
 set_io {o_tx_serial[0]}  \
     -pinname P18         \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[1]}  \
     -pinname L7          \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[2]}  \
     -pinname G1          \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[3]}  \
     -pinname T19         \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[4]}  \
     -pinname V20         \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[5]}  \
     -pinname G2          \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[6]}  \
     -pinname K7          \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io {o_tx_serial[7]}  \
     -pinname U20         \
     -fixed yes           \
+    -RES_PULL Up         \
     -DIRECTION OUTPUT
 
 
 set_io o_tx_serial_fdbck  \
     -pinname T7           \
     -fixed yes            \
+    -RES_PULL Up          \
     -DIRECTION OUTPUT
 
 

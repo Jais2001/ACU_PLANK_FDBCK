@@ -69,6 +69,7 @@ module UART_Controlller_ACU_Plank (
     wire w_rst_n;
     
     wire [7:0] w_uart_rx_data;
+    wire w_uart_rx_error;
     wire w_uart_rx_valid;
 
     reg[7:0] r_uart_rx_data;
