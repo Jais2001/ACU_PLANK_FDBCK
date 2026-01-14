@@ -6,7 +6,7 @@
 
 # Family: SmartFusion2 , Die: M2S090TS , Package: 676 FBGA
 
-# Date generated: Mon Nov  3 18:29:58 2025 
+# Date generated: Tue Jan 13 13:34:29 2026 
 
 
 # 
@@ -24,6 +24,120 @@
 # 
 # User Locked I/O settings
 # 
+
+set_io i_BEAM_ID_0    \
+    -pinname AF22     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_1    \
+    -pinname AF23     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_2    \
+    -pinname AE19     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_3    \
+    -pinname AD19     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_4    \
+    -pinname AE20     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_5    \
+    -pinname Y21      \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_BEAM_ID_6    \
+    -pinname A2       \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_EMIT_SEL_0   \
+    -pinname AF18     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_EMIT_SEL_1   \
+    -pinname AF19     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_EMIT_SEL_2   \
+    -pinname AB16     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_EMIT_SEL_3   \
+    -pinname AF20     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_EMIT_SEL_4   \
+    -pinname AB17     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_0    \
+    -pinname U22      \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_1    \
+    -pinname AA13     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_2    \
+    -pinname AA14     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_3    \
+    -pinname AA18     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_4    \
+    -pinname AB15     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_5    \
+    -pinname AF13     \
+    -fixed yes        \
+    -DIRECTION INPUT
+
+
+set_io i_ERP_BUS_6    \
+    -pinname V21      \
+    -fixed yes        \
+    -DIRECTION INPUT
+
 
 set_io i_TR_pulse     \
     -pinname AB22     \
@@ -266,8 +380,470 @@ set_io {o_ATT4[5]}     \
     -DIRECTION OUTPUT
 
 
+set_io o_BEAM_ID_1_A_TRM1  \
+    -pinname AE17          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_A_TRM2  \
+    -pinname M5            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_A_TRM3  \
+    -pinname G26           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_A_TRM4  \
+    -pinname B10           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_B_TRM1  \
+    -pinname AD12          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_B_TRM2  \
+    -pinname N19           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_B_TRM3  \
+    -pinname D2            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_1_B_TRM4  \
+    -pinname J26           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_A_TRM1  \
+    -pinname AD17          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_A_TRM2  \
+    -pinname K9            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_A_TRM3  \
+    -pinname G25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_A_TRM4  \
+    -pinname G18           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_B_TRM1  \
+    -pinname AE12          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_B_TRM2  \
+    -pinname L19           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_B_TRM3  \
+    -pinname E2            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_2_B_TRM4  \
+    -pinname J23           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_A_TRM1  \
+    -pinname AC15          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_A_TRM2  \
+    -pinname A7            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_A_TRM3  \
+    -pinname F25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_A_TRM4  \
+    -pinname B12           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_B_TRM1  \
+    -pinname A9            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_B_TRM2  \
+    -pinname H24           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_B_TRM3  \
+    -pinname F4            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_3_B_TRM4  \
+    -pinname J24           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_A_TRM1  \
+    -pinname AD22          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_A_TRM2  \
+    -pinname C1            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_A_TRM3  \
+    -pinname C23           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_B_TRM1  \
+    -pinname W13           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_B_TRM2  \
+    -pinname V25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_B_TRM3  \
+    -pinname F10           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_4_B_TRM4  \
+    -pinname E9            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_A_TRM1  \
+    -pinname AC16          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_A_TRM2  \
+    -pinname A4            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_A_TRM3  \
+    -pinname E21           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_A_TRM4  \
+    -pinname D14           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_B_TRM1  \
+    -pinname M2            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_B_TRM2  \
+    -pinname P26           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_B_TRM3  \
+    -pinname G5            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_5_B_TRM4  \
+    -pinname C8            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_BEAM_ID_6_A_TRM1  \
+    -pinname A5            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
 set_io o_BITE_CNTRL    \
     -pinname U1        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_A_TRM1  \
+    -pinname AE22          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_A_TRM2  \
+    -pinname C3            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_A_TRM3  \
+    -pinname D21           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_B_TRM1  \
+    -pinname N8            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_B_TRM2  \
+    -pinname T20           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_B_TRM3  \
+    -pinname G7            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_1_B_TRM4  \
+    -pinname B8            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_A_TRM1  \
+    -pinname AC19          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_A_TRM3  \
+    -pinname C21           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_A_TRM4  \
+    -pinname B13           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_B_TRM1  \
+    -pinname AE15          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_B_TRM2  \
+    -pinname U26           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_B_TRM3  \
+    -pinname H1            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_2_B_TRM4  \
+    -pinname B25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_A_TRM1  \
+    -pinname AD21          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_A_TRM2  \
+    -pinname C6            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_A_TRM3  \
+    -pinname A22           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_B_TRM1  \
+    -pinname N10           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_B_TRM2  \
+    -pinname U23           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_B_TRM3  \
+    -pinname G6            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_3_B_TRM4  \
+    -pinname A25           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_A_TRM1  \
+    -pinname AC20          \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_A_TRM2  \
+    -pinname B6            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_A_TRM3  \
+    -pinname B23           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_B_TRM1  \
+    -pinname P7            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_B_TRM2  \
+    -pinname A8            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_B_TRM3  \
+    -pinname J8            \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_4_B_TRM4  \
+    -pinname A10           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_ERP_MOD_5_A_TRM1  \
+    -pinname A12           \
+    -fixed yes             \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_A_TRM1  \
+    -pinname AC26      \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_A_TRM2  \
+    -pinname M7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_A_TRM3  \
+    -pinname A19       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_A_TRM4  \
+    -pinname H14       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_B_TRM1  \
+    -pinname AB11      \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_B_TRM2  \
+    -pinname L25       \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_B_TRM3  \
+    -pinname E7        \
+    -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_RESET_B_TRM4  \
+    -pinname F2        \
     -fixed yes         \
     -DIRECTION OUTPUT
 
@@ -275,6 +851,192 @@ set_io o_BITE_CNTRL    \
 set_io o_SUB_ARRAY     \
     -pinname T8        \
     -fixed yes         \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_A_TRM1  \
+    -pinname AB18         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_A_TRM3  \
+    -pinname J21          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_A_TRM4  \
+    -pinname E10          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_B_TRM1  \
+    -pinname Y14          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_B_TRM2  \
+    -pinname H26          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_B_TRM3  \
+    -pinname A13          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_1_B_TRM4  \
+    -pinname F22          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_A_TRM1  \
+    -pinname AC14         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_A_TRM2  \
+    -pinname B1           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_A_TRM3  \
+    -pinname J22          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_A_TRM4  \
+    -pinname E12          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_B_TRM1  \
+    -pinname AA12         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_B_TRM2  \
+    -pinname K20          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_B_TRM3  \
+    -pinname C4           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_2_B_TRM4  \
+    -pinname N24          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_A_TRM1  \
+    -pinname AD14         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_A_TRM2  \
+    -pinname D4           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_A_TRM3  \
+    -pinname H23          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_A_TRM4  \
+    -pinname C9           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_B_TRM1  \
+    -pinname AB12         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_B_TRM2  \
+    -pinname H25          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_B_TRM3  \
+    -pinname B2           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_3_B_TRM4  \
+    -pinname N26          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_A_TRM1  \
+    -pinname AE21         \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_A_TRM2  \
+    -pinname E4           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_A_TRM3  \
+    -pinname G23          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_A_TRM4  \
+    -pinname C10          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_B_TRM1  \
+    -pinname W12          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_B_TRM2  \
+    -pinname N20          \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_B_TRM3  \
+    -pinname D3           \
+    -fixed yes            \
+    -DIRECTION OUTPUT
+
+
+set_io o_THT_ID_4_B_TRM4  \
+    -pinname N25          \
+    -fixed yes            \
     -DIRECTION OUTPUT
 
 
@@ -398,51 +1160,51 @@ set_io {o_enable[3]}   \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_0     \
-    -pinname W19       \
-    -fixed yes         \
+set_io o_inhibit_ID_A_TRM1  \
+    -pinname AA19           \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_1     \
-    -pinname P4        \
-    -fixed yes         \
+set_io o_inhibit_ID_A_TRM2  \
+    -pinname M6             \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_2     \
-    -pinname H5        \
-    -fixed yes         \
+set_io o_inhibit_ID_A_TRM3  \
+    -pinname G17            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_3     \
-    -pinname C25       \
-    -fixed yes         \
+set_io o_inhibit_ID_A_TRM4  \
+    -pinname D11            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_4     \
-    -pinname D18       \
-    -fixed yes         \
+set_io o_inhibit_ID_B_TRM1  \
+    -pinname Y12            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_5     \
-    -pinname D7        \
-    -fixed yes         \
+set_io o_inhibit_ID_B_TRM2  \
+    -pinname M26            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_6     \
-    -pinname H15       \
-    -fixed yes         \
+set_io o_inhibit_ID_B_TRM3  \
+    -pinname H11            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
-set_io o_inhibit_7     \
-    -pinname C24       \
-    -fixed yes         \
+set_io o_inhibit_ID_B_TRM4  \
+    -pinname L22            \
+    -fixed yes              \
     -DIRECTION OUTPUT
 
 
@@ -491,54 +1253,6 @@ set_io o_phase_180_6   \
 set_io o_phase_180_7   \
     -pinname M23       \
     -fixed yes         \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[0]}  \
-    -pinname AC26          \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[1]}  \
-    -pinname AB11          \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[2]}  \
-    -pinname M7            \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[3]}  \
-    -pinname L25           \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[4]}  \
-    -pinname A19           \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[5]}  \
-    -pinname E7            \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[6]}  \
-    -pinname H14           \
-    -fixed yes             \
-    -DIRECTION OUTPUT
-
-
-set_io {o_reset_plank[7]}  \
-    -pinname F2            \
-    -fixed yes             \
     -DIRECTION OUTPUT
 
 
