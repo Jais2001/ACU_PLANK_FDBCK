@@ -4,10 +4,10 @@ module UART_Controlller_ACU_Plank (
     input wire i_usr_rst,
     input wire i_rx_serial,
 
-    input wire i_attn_31p5,
-    input wire i_phase_180,
-    input wire i_TR_pulse,
-    input wire i_inhibit,
+    input wire i_attn_31p5, // STROBE_1
+    input wire i_phase_180, // Strobe_2
+    input wire i_TR_pulse, // i_BEAM_ID_7 working as ATP_mode
+    input wire i_inhibit, // i_BEAM_ID_6
 
     input wire[7:0] i_fdbck_plank,
 
@@ -24,12 +24,6 @@ module UART_Controlller_ACU_Plank (
     input wire i_BEAM_ID_4,
     input wire i_BEAM_ID_5,
 
-    input wire i_BEAM_ID_6, // To inhibit
-    input wire i_BEAM_ID_7, // to ATP mode
-
-    input wire i_STROBE_1,
-    input wire i_STROBE_2,
-
     input wire i_ERP_BUS_0,
     input wire i_ERP_BUS_1,
     input wire i_ERP_BUS_2,
@@ -39,11 +33,7 @@ module UART_Controlller_ACU_Plank (
     input wire i_ERP_BUS_6,
     input wire i_ERP_BUS_7,
 
-    // input wire i_ATxU_STATUS_SG_0,
-    // input wire i_ATxU_STATUS_SG_1,
-    // input wire i_ATxU_STATUS_SG_2,
-    // input wire i_ATxU_STATUS_SG_3,
-    // input wire i_ATxU_STATUS_SG_4,
+    input wire i_DET_ADC_SDO,
 
     output wire[3:0] o_enable,
     output wire[5:0] o_ATT1,
@@ -98,7 +88,7 @@ module UART_Controlller_ACU_Plank (
     output wire o_THT_ID_2_A_TRM1,
     output wire o_THT_ID_3_A_TRM1,
     output wire o_THT_ID_4_A_TRM1,
-    output wire o_THT_ID_5_A_TRM1,
+    output wire o_THT_ID_5_A_TRM1, // used as SPARE9
 
     output wire o_BEAM_ID_1_A_TRM1,
     output wire o_BEAM_ID_2_A_TRM1,
@@ -106,8 +96,6 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_A_TRM1,
     output wire o_BEAM_ID_5_A_TRM1,
     output wire o_BEAM_ID_6_A_TRM1,
-    // output wire o_BEAM_ID_7_A_TRM1,
-    // output wire o_BEAM_ID_8_A_TRM1,
 
     output wire o_ERP_MOD_1_A_TRM1,
     output wire o_ERP_MOD_2_A_TRM1,
@@ -118,14 +106,38 @@ module UART_Controlller_ACU_Plank (
     output wire o_ERP_MOD_7_A_TRM1,
     output wire o_ERP_MOD_8_A_TRM1,
 
+    output wire o_SUB_ARRAY_SEL_0_A_TRM1, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_B_TRM1, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_A_TRM2, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_B_TRM2, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_A_TRM3, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_B_TRM3, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_A_TRM4, // ATP_Mode
+    output wire o_SUB_ARRAY_SEL_0_B_TRM4, // ATP_Mode
 
+    output wire o_STROBE_A_TRM1, // STROBE_1 
+    output wire o_STROBE_B_TRM1, // STROBE_1 
+    output wire o_STROBE_A_TRM2, // STROBE_1 
+    output wire o_STROBE_B_TRM2, // STROBE_1 
+    output wire o_STROBE_A_TRM3, // STROBE_1 
+    output wire o_STROBE_B_TRM3, // STROBE_1 
+    output wire o_STROBE_A_TRM4, // STROBE_1 
+    output wire o_STROBE_B_TRM4, // STROBE_1
 
+    output wire o_SUB_ARRAY_SEL_1_A_TRM1, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_B_TRM1, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_A_TRM2, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_B_TRM2, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_A_TRM3, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_B_TRM3, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_A_TRM4, // STROBE_2
+    output wire o_SUB_ARRAY_SEL_1_B_TRM4, // STROBE_2
 
     output wire o_THT_ID_1_B_TRM1,
     output wire o_THT_ID_2_B_TRM1,
     output wire o_THT_ID_3_B_TRM1,
     output wire o_THT_ID_4_B_TRM1,
-    output wire o_THT_ID_5_B_TRM1,
+    output wire o_THT_ID_5_B_TRM1, // used as SPARE9
 
     output wire o_BEAM_ID_1_B_TRM1,
     output wire o_BEAM_ID_2_B_TRM1,
@@ -133,16 +145,15 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_B_TRM1,
     output wire o_BEAM_ID_5_B_TRM1,
     output wire o_BEAM_ID_6_B_TRM1,
-    // output wire o_BEAM_ID_7_B_TRM1,
-    // output wire o_BEAM_ID_8_B_TRM1,
 
     output wire o_ERP_MOD_1_B_TRM1,
     output wire o_ERP_MOD_2_B_TRM1,
     output wire o_ERP_MOD_3_B_TRM1,
     output wire o_ERP_MOD_4_B_TRM1,
     output wire o_ERP_MOD_5_B_TRM1,
-
-
+    output wire o_ERP_MOD_6_B_TRM1,
+    output wire o_ERP_MOD_7_B_TRM1,
+    output wire o_ERP_MOD_8_B_TRM1,
 
     output wire o_THT_ID_1_A_TRM2,
     output wire o_THT_ID_2_A_TRM2,
@@ -156,23 +167,22 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_A_TRM2,
     output wire o_BEAM_ID_5_A_TRM2,
     output wire o_BEAM_ID_6_A_TRM2,
-    // output wire o_BEAM_ID_7_A_TRM2,
-    // output wire o_BEAM_ID_8_A_TRM2,
 
     output wire o_ERP_MOD_1_A_TRM2,
     output wire o_ERP_MOD_2_A_TRM2,
     output wire o_ERP_MOD_3_A_TRM2,
     output wire o_ERP_MOD_4_A_TRM2,
     output wire o_ERP_MOD_5_A_TRM2,
-
-
+    output wire o_ERP_MOD_6_A_TRM2,
+    output wire o_ERP_MOD_7_A_TRM2,
+    output wire o_ERP_MOD_8_A_TRM2,
 
 
     output wire o_THT_ID_1_B_TRM2,
     output wire o_THT_ID_2_B_TRM2,
     output wire o_THT_ID_3_B_TRM2,
     output wire o_THT_ID_4_B_TRM2,
-    output wire o_THT_ID_5_B_TRM2,
+    output wire o_THT_ID_5_B_TRM2, // used as SPARE9
 
     output wire o_BEAM_ID_1_B_TRM2,
     output wire o_BEAM_ID_2_B_TRM2,
@@ -180,16 +190,15 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_B_TRM2,
     output wire o_BEAM_ID_5_B_TRM2,
     output wire o_BEAM_ID_6_B_TRM2,
-    // output wire o_BEAM_ID_7_B_TRM2,
-    // output wire o_BEAM_ID_8_B_TRM2,
 
     output wire o_ERP_MOD_1_B_TRM2,
     output wire o_ERP_MOD_2_B_TRM2,
     output wire o_ERP_MOD_3_B_TRM2,
     output wire o_ERP_MOD_4_B_TRM2,
     output wire o_ERP_MOD_5_B_TRM2,
-
-
+    output wire o_ERP_MOD_6_B_TRM2,
+    output wire o_ERP_MOD_7_B_TRM2,
+    output wire o_ERP_MOD_8_B_TRM2,
 
 
     output wire o_THT_ID_1_A_TRM3,
@@ -204,23 +213,22 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_A_TRM3,
     output wire o_BEAM_ID_5_A_TRM3,
     output wire o_BEAM_ID_6_A_TRM3,
-    // output wire o_BEAM_ID_7_A_TRM3,
-    // output wire o_BEAM_ID_8_A_TRM3,
 
     output wire o_ERP_MOD_1_A_TRM3,
     output wire o_ERP_MOD_2_A_TRM3,
     output wire o_ERP_MOD_3_A_TRM3,
     output wire o_ERP_MOD_4_A_TRM3,
     output wire o_ERP_MOD_5_A_TRM3,
-
-
+    output wire o_ERP_MOD_6_A_TRM3,
+    output wire o_ERP_MOD_7_A_TRM3,
+    output wire o_ERP_MOD_8_A_TRM3,
 
 
     output wire o_THT_ID_1_B_TRM3,
     output wire o_THT_ID_2_B_TRM3,
     output wire o_THT_ID_3_B_TRM3,
     output wire o_THT_ID_4_B_TRM3,
-    output wire o_THT_ID_5_B_TRM3,
+    output wire o_THT_ID_5_B_TRM3, // used as SPARE9
 
     output wire o_BEAM_ID_1_B_TRM3,
     output wire o_BEAM_ID_2_B_TRM3,
@@ -228,14 +236,15 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_B_TRM3,
     output wire o_BEAM_ID_5_B_TRM3,
     output wire o_BEAM_ID_6_B_TRM3,
-    // output wire o_BEAM_ID_7_B_TRM3,
-    // output wire o_BEAM_ID_8_B_TRM3,
 
     output wire o_ERP_MOD_1_B_TRM3,
     output wire o_ERP_MOD_2_B_TRM3,
     output wire o_ERP_MOD_3_B_TRM3,
     output wire o_ERP_MOD_4_B_TRM3,
     output wire o_ERP_MOD_5_B_TRM3,
+    output wire o_ERP_MOD_6_B_TRM3,
+    output wire o_ERP_MOD_7_B_TRM3,
+    output wire o_ERP_MOD_8_B_TRM3,
 
 
 
@@ -243,7 +252,7 @@ module UART_Controlller_ACU_Plank (
     output wire o_THT_ID_2_A_TRM4,
     output wire o_THT_ID_3_A_TRM4,
     output wire o_THT_ID_4_A_TRM4,
-    output wire o_THT_ID_5_A_TRM4,
+    output wire o_THT_ID_5_A_TRM4, // used as SPARE9
 
     output wire o_BEAM_ID_1_A_TRM4,
     output wire o_BEAM_ID_2_A_TRM4,
@@ -251,14 +260,15 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_A_TRM4,
     output wire o_BEAM_ID_5_A_TRM4,
     output wire o_BEAM_ID_6_A_TRM4,
-    // output wire o_BEAM_ID_7_A_TRM4,
-    // output wire o_BEAM_ID_8_A_TRM4,
 
     output wire o_ERP_MOD_1_A_TRM4,
     output wire o_ERP_MOD_2_A_TRM4,
     output wire o_ERP_MOD_3_A_TRM4,
     output wire o_ERP_MOD_4_A_TRM4,
     output wire o_ERP_MOD_5_A_TRM4,
+    output wire o_ERP_MOD_6_A_TRM4,
+    output wire o_ERP_MOD_7_A_TRM4,
+    output wire o_ERP_MOD_8_A_TRM4,
 
 
 
@@ -266,7 +276,7 @@ module UART_Controlller_ACU_Plank (
     output wire o_THT_ID_2_B_TRM4,
     output wire o_THT_ID_3_B_TRM4,
     output wire o_THT_ID_4_B_TRM4,
-    output wire o_THT_ID_5_B_TRM4,
+    output wire o_THT_ID_5_B_TRM4, // used as SPARE9
 
     output wire o_BEAM_ID_1_B_TRM4,
     output wire o_BEAM_ID_2_B_TRM4,
@@ -274,14 +284,15 @@ module UART_Controlller_ACU_Plank (
     output wire o_BEAM_ID_4_B_TRM4,
     output wire o_BEAM_ID_5_B_TRM4,
     output wire o_BEAM_ID_6_B_TRM4,
-    // output wire o_BEAM_ID_7_B_TRM4,
-    // output wire o_BEAM_ID_8_B_TRM4,
 
     output wire o_ERP_MOD_1_B_TRM4,
     output wire o_ERP_MOD_2_B_TRM4,
     output wire o_ERP_MOD_3_B_TRM4,
     output wire o_ERP_MOD_4_B_TRM4,
     output wire o_ERP_MOD_5_B_TRM4,
+    output wire o_ERP_MOD_6_B_TRM4,
+    output wire o_ERP_MOD_7_B_TRM4,
+    output wire o_ERP_MOD_8_B_TRM4,
 
     output wire o_RESET_A_TRM1,
     output wire o_RESET_B_TRM1,
@@ -290,8 +301,72 @@ module UART_Controlller_ACU_Plank (
     output wire o_RESET_A_TRM3,
     output wire o_RESET_B_TRM3,
     output wire o_RESET_A_TRM4,
-    output wire o_RESET_B_TRM4
+    output wire o_RESET_B_TRM4,
 
+    output wire o_ATxU_STATUS_SG_0,
+    output wire o_ATxU_STATUS_SG_1,
+    output wire o_ATxU_STATUS_SG_2,
+    output wire o_ATxU_STATUS_SG_3,
+
+    output wire o_DET_ADC_CSB2,
+    output wire o_DET_ADC_CSB1,
+    output wire o_DET_ADC_SCK,
+    output wire o_DET_ADC_SDI,
+
+
+    output wire o_TRM_OFF_A_TRM1,
+    output wire o_TRM_OFF_A_TRM2,
+    output wire o_TRM_OFF_A_TRM3,
+    output wire o_TRM_OFF_A_TRM4,
+    output wire o_TRM_OFF_B_TRM1,
+    output wire o_TRM_OFF_B_TRM2,
+    output wire o_TRM_OFF_B_TRM3,
+    output wire o_TRM_OFF_B_TRM4,
+
+    output wire o_Ext_CLK_IN_A_TRM1,
+    output wire o_Ext_CLK_IN_A_TRM2,
+    output wire o_Ext_CLK_IN_A_TRM3,
+    output wire o_Ext_CLK_IN_A_TRM4,
+    output wire o_Ext_CLK_IN_B_TRM1,
+    output wire o_Ext_CLK_IN_B_TRM2,
+    output wire o_Ext_CLK_IN_B_TRM3,
+    output wire o_Ext_CLK_IN_B_TRM4,
+
+    output wire o_CLK_OUT_A_TRM1,
+    output wire o_CLK_OUT_A_TRM2,
+    output wire o_CLK_OUT_A_TRM3,
+    output wire o_CLK_OUT_A_TRM4,
+    output wire o_CLK_OUT_B_TRM1,
+    output wire o_CLK_OUT_B_TRM2,
+    output wire o_CLK_OUT_B_TRM3,
+    output wire o_CLK_OUT_B_TRM4,
+
+    output wire o_FREQ_BAND_SEL_0_A_TRM1,
+    output wire o_FREQ_BAND_SEL_0_A_TRM2,
+    output wire o_FREQ_BAND_SEL_0_A_TRM3,
+    output wire o_FREQ_BAND_SEL_0_A_TRM4,
+    output wire o_FREQ_BAND_SEL_0_B_TRM1,
+    output wire o_FREQ_BAND_SEL_0_B_TRM2,
+    output wire o_FREQ_BAND_SEL_0_B_TRM3,
+    output wire o_FREQ_BAND_SEL_0_B_TRM4,
+
+    output wire o_FREQ_BAND_SEL_1_A_TRM1,
+    output wire o_FREQ_BAND_SEL_1_A_TRM2,
+    output wire o_FREQ_BAND_SEL_1_A_TRM3,
+    output wire o_FREQ_BAND_SEL_1_A_TRM4,
+    output wire o_FREQ_BAND_SEL_1_B_TRM1,
+    output wire o_FREQ_BAND_SEL_1_B_TRM2,
+    output wire o_FREQ_BAND_SEL_1_B_TRM3,
+    output wire o_FREQ_BAND_SEL_1_B_TRM4,
+
+    output wire o_T_R_SWITCHING_A_TRM1,
+    output wire o_T_R_SWITCHING_A_TRM2,
+    output wire o_T_R_SWITCHING_A_TRM3,
+    output wire o_T_R_SWITCHING_A_TRM4,
+    output wire o_T_R_SWITCHING_B_TRM1,
+    output wire o_T_R_SWITCHING_B_TRM2,
+    output wire o_T_R_SWITCHING_B_TRM3,
+    output wire o_T_R_SWITCHING_B_TRM4
 );
     localparam CLOCK_FREQ = 100000000;
     localparam BAUD_RATE = 115200;
@@ -1493,14 +1568,14 @@ module UART_Controlller_ACU_Plank (
     
     //w_rst_n 
     
-    // assign w_rest_control0 = (r_Plank_module == 3'd0) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control1 = (r_Plank_module == 3'd1) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control2 = (r_Plank_module == 3'd2) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control3 = (r_Plank_module == 3'd3) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control4 = (r_Plank_module == 3'd4) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control5 = (r_Plank_module == 3'd5) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control6 = (r_Plank_module == 3'd6) ? ~w_rst_PLANK : 1'b1;
-    // assign w_rest_control7 = (r_Plank_module == 3'd7) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control0 = (r_Plank_module == 3'd0) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control1 = (r_Plank_module == 3'd1) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control2 = (r_Plank_module == 3'd2) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control3 = (r_Plank_module == 3'd3) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control4 = (r_Plank_module == 3'd4) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control5 = (r_Plank_module == 3'd5) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control6 = (r_Plank_module == 3'd6) ? ~w_rst_PLANK : 1'b1;
+    assign w_rest_control7 = (r_Plank_module == 3'd7) ? ~w_rst_PLANK : 1'b1;
     
     
     // assign o_reset_plank[0] = (w_rst_n == 1'b0 || w_rest_control0 == 1'b0) ? 1'b0 : 1'b1 ; 
@@ -1512,44 +1587,175 @@ module UART_Controlller_ACU_Plank (
     // assign o_reset_plank[6] = (w_rst_n == 1'b0 || w_rest_control6 == 1'b0) ? 1'b0 : 1'b1 ;  
     // assign o_reset_plank[7] = (w_rst_n == 1'b0 || w_rest_control7 == 1'b0) ? 1'b0 : 1'b1 ;  
 
+    assign o_RESET_A_TRM1 = (w_rst_n == 1'b0 || w_rest_control0 == 1'b0) ? 1'b0 : 1'b1 ; 
+    assign o_RESET_B_TRM1 = (w_rst_n == 1'b0 || w_rest_control1 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_A_TRM2 = (w_rst_n == 1'b0 || w_rest_control2 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_B_TRM2 = (w_rst_n == 1'b0 || w_rest_control3 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_A_TRM3 = (w_rst_n == 1'b0 || w_rest_control4 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_B_TRM3 = (w_rst_n == 1'b0 || w_rest_control5 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_A_TRM4 = (w_rst_n == 1'b0 || w_rest_control6 == 1'b0) ? 1'b0 : 1'b1 ;  
+    assign o_RESET_B_TRM4 = (w_rst_n == 1'b0 || w_rest_control7 == 1'b0) ? 1'b0 : 1'b1 ;  
+
     assign o_BITE_CNTRL = r_BITE_CNTRL;
     assign o_SUB_ARRAY  = r_SUB_ARRAY;
 
-    assign o_attn_31p5_0 = ((r_Plank_module == 3'd0) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_1 = ((r_Plank_module == 3'd1) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_2 = ((r_Plank_module == 3'd2) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_3 = ((r_Plank_module == 3'd3) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_4 = ((r_Plank_module == 3'd4) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_5 = ((r_Plank_module == 3'd5) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_6 = ((r_Plank_module == 3'd6) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
-    assign o_attn_31p5_7 = ((r_Plank_module == 3'd7) && (r_soft_inhibit && i_inhibit)) ? i_attn_31p5 : 1'b0;
+    // reg r_attn_31p5_0 = 0;
+    // reg r_attn_31p5_1 = 0;
+    // reg r_attn_31p5_2 = 0;
+    // reg r_attn_31p5_3 = 0;
+    // reg r_attn_31p5_4 = 0;
+    // reg r_attn_31p5_5 = 0;
+    // reg r_attn_31p5_6 = 0;
+    // reg r_attn_31p5_7 = 0;
 
-    assign o_phase_180_0 = ((r_Plank_module == 3'd0) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_1 = ((r_Plank_module == 3'd1) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_2 = ((r_Plank_module == 3'd2) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_3 = ((r_Plank_module == 3'd3) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_4 = ((r_Plank_module == 3'd4) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_5 = ((r_Plank_module == 3'd5) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_6 = ((r_Plank_module == 3'd6) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
-    assign o_phase_180_7 = ((r_Plank_module == 3'd7) && (r_soft_inhibit && i_inhibit)) ? i_phase_180 : 1'b0;
+    // always @(posedge i_clk_100) begin
+    //     if (r_soft_inhibit && i_inhibit) begin
+    //         case (r_Plank_module)
+    //             3'd0: r_attn_31p5_0 <= i_attn_31p5;
+    //             3'd1: r_attn_31p5_1 <= i_attn_31p5;
+    //             3'd2: r_attn_31p5_2 <= i_attn_31p5;
+    //             3'd3: r_attn_31p5_3 <= i_attn_31p5;
+    //             3'd4: r_attn_31p5_4 <= i_attn_31p5;
+    //             3'd5: r_attn_31p5_5 <= i_attn_31p5;
+    //             3'd6: r_attn_31p5_6 <= i_attn_31p5;
+    //             3'd7: r_attn_31p5_7 <= i_attn_31p5;
+    //             default: ;
+    //         endcase
+    //     end
+    // end
 
-    assign o_TR_pulse_0 = ((r_Plank_module == 3'd0) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_1 = ((r_Plank_module == 3'd1) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_2 = ((r_Plank_module == 3'd2) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_3 = ((r_Plank_module == 3'd3) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_4 = ((r_Plank_module == 3'd4) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_5 = ((r_Plank_module == 3'd5) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_6 = ((r_Plank_module == 3'd6) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
-    assign o_TR_pulse_7 = ((r_Plank_module == 3'd7) && (r_soft_inhibit && i_inhibit)) ? i_TR_pulse : 1'b0;
+    // reg r_phase_180_0 = 0;
+    // reg r_phase_180_1 = 0;
+    // reg r_phase_180_2 = 0;
+    // reg r_phase_180_3 = 0;
+    // reg r_phase_180_4 = 0;
+    // reg r_phase_180_5 = 0;
+    // reg r_phase_180_6 = 0;
+    // reg r_phase_180_7 = 0;
 
-    assign o_inhibit_ID_A_TRM1 = i_BEAM_ID_6; //((r_Plank_module == 3'd0) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_B_TRM1 = i_BEAM_ID_6; //((r_Plank_module == 3'd1) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_A_TRM2 = i_BEAM_ID_6; //((r_Plank_module == 3'd2) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_B_TRM2 = i_BEAM_ID_6; //((r_Plank_module == 3'd3) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_A_TRM3 = i_BEAM_ID_6; //((r_Plank_module == 3'd4) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_B_TRM3 = i_BEAM_ID_6; //((r_Plank_module == 3'd5) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_A_TRM4 = i_BEAM_ID_6; //((r_Plank_module == 3'd6) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
-    assign o_inhibit_ID_B_TRM4 = i_BEAM_ID_6; //((r_Plank_module == 3'd7) && (r_soft_inhibit && i_inhibit)) ? i_inhibit : 1'b0;
+    // always @(posedge i_clk_100) begin
+    //     if (r_soft_inhibit && i_inhibit) begin
+    //         case (r_Plank_module)
+    //             3'd0: r_phase_180_0 <= i_phase_180;
+    //             3'd1: r_phase_180_1 <= i_phase_180;
+    //             3'd2: r_phase_180_2 <= i_phase_180;
+    //             3'd3: r_phase_180_3 <= i_phase_180;
+    //             3'd4: r_phase_180_4 <= i_phase_180;
+    //             3'd5: r_phase_180_5 <= i_phase_180;
+    //             3'd6: r_phase_180_6 <= i_phase_180;
+    //             3'd7: r_phase_180_7 <= i_phase_180;
+    //             default: ;
+    //         endcase
+    //     end
+    // end
+
+
+    // reg r_TR_pulse_0 = 0;
+    // reg r_TR_pulse_1 = 0;
+    // reg r_TR_pulse_2 = 0;
+    // reg r_TR_pulse_3 = 0;
+    // reg r_TR_pulse_4 = 0;
+    // reg r_TR_pulse_5 = 0;
+    // reg r_TR_pulse_6 = 0;
+    // reg r_TR_pulse_7 = 0;
+
+    // always @(posedge i_clk_100) begin
+    //     if (r_soft_inhibit && i_inhibit) begin
+    //         case (r_Plank_module)
+    //             3'd0: r_TR_pulse_0 <= i_TR_pulse;
+    //             3'd1: r_TR_pulse_1 <= i_TR_pulse;
+    //             3'd2: r_TR_pulse_2 <= i_TR_pulse;
+    //             3'd3: r_TR_pulse_3 <= i_TR_pulse;
+    //             3'd4: r_TR_pulse_4 <= i_TR_pulse;
+    //             3'd5: r_TR_pulse_5 <= i_TR_pulse;
+    //             3'd6: r_TR_pulse_6 <= i_TR_pulse;
+    //             3'd7: r_TR_pulse_7 <= i_TR_pulse;
+    //             default: ;
+    //         endcase
+    //     end
+    // end
+
+
+    // reg r_i_inhibit_0 = 0;
+    // reg r_i_inhibit_1 = 0;
+    // reg r_i_inhibit_2 = 0;
+    // reg r_i_inhibit_3 = 0;
+    // reg r_i_inhibit_4 = 0;
+    // reg r_i_inhibit_5 = 0;
+    // reg r_i_inhibit_6 = 0;
+    // reg r_i_inhibit_7 = 0;
+
+    // always @(posedge i_clk_100) begin
+    //     if (r_soft_inhibit && i_inhibit) begin
+    //         case (r_Plank_module)
+    //             3'd0: r_i_inhibit_0 <= i_inhibit;
+    //             3'd1: r_i_inhibit_1 <= i_inhibit;
+    //             3'd2: r_i_inhibit_2 <= i_inhibit;
+    //             3'd3: r_i_inhibit_3 <= i_inhibit;
+    //             3'd4: r_i_inhibit_4 <= i_inhibit;
+    //             3'd5: r_i_inhibit_5 <= i_inhibit;
+    //             3'd6: r_i_inhibit_6 <= i_inhibit;
+    //             3'd7: r_i_inhibit_7 <= i_inhibit;
+    //             default: ;
+    //         endcase
+    //     end
+    // end
+
+
+    assign o_attn_31p5_0 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_1 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_2 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_3 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_4 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_5 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_6 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+    assign o_attn_31p5_7 = (r_soft_inhibit && i_inhibit) ? i_attn_31p5 : 1'b0;
+
+    assign o_phase_180_0 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_1 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_2 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_3 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_4 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_5 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_6 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+    assign o_phase_180_7 = (r_soft_inhibit && i_inhibit) ? i_phase_180 : 1'b0;
+
+    assign o_TR_pulse_0 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_1 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_2 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_3 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_4 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_5 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_6 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+    assign o_TR_pulse_7 = (r_soft_inhibit && i_inhibit) ? i_TR_pulse : 1'b0;
+
+    assign o_inhibit_ID_A_TRM1 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_B_TRM1 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_A_TRM2 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_B_TRM2 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_A_TRM3 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_B_TRM3 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_A_TRM4 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+    assign o_inhibit_ID_B_TRM4 = (r_soft_inhibit && i_inhibit) ? i_inhibit : 1'b0;
+
+
+    assign o_STROBE_A_TRM1 = i_usr_rst;
+    assign o_STROBE_B_TRM1 = i_usr_rst;
+    assign o_STROBE_A_TRM2 = i_usr_rst;
+    assign o_STROBE_B_TRM2 = i_usr_rst;
+    assign o_STROBE_A_TRM3 = i_usr_rst;
+    assign o_STROBE_B_TRM3 = i_usr_rst;
+    assign o_STROBE_A_TRM4 = i_usr_rst;
+    assign o_STROBE_B_TRM4 = i_usr_rst;
+
+    assign o_SUB_ARRAY_SEL_0_A_TRM1 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_B_TRM1 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_A_TRM2 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_B_TRM2 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_A_TRM3 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_B_TRM3 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_A_TRM4 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_0_B_TRM4 = i_usr_rst;
 
     assign o_THT_ID_1_A_TRM1 = i_EMIT_SEL_0; 
     assign o_THT_ID_2_A_TRM1 = i_EMIT_SEL_1; 
@@ -1573,7 +1779,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_A_TRM1 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_A_TRM1 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_A_TRM1 =  i_ERP_BUS_6;
-
+    assign o_ERP_MOD_8_A_TRM1 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_B_TRM1 = i_EMIT_SEL_0; 
@@ -1598,6 +1804,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_B_TRM1 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_B_TRM1 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_B_TRM1 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_B_TRM1 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_A_TRM2 = i_EMIT_SEL_0; 
@@ -1622,6 +1829,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_A_TRM2 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_A_TRM2 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_A_TRM2 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_A_TRM2 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_B_TRM2 = i_EMIT_SEL_0; 
@@ -1646,6 +1854,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_B_TRM2 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_B_TRM2 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_B_TRM2 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_B_TRM2 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_A_TRM3 = i_EMIT_SEL_0; 
@@ -1670,6 +1879,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_A_TRM3 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_A_TRM3 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_A_TRM3 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_A_TRM3 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_B_TRM3 = i_EMIT_SEL_0; 
@@ -1694,6 +1904,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_B_TRM3 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_B_TRM3 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_B_TRM3 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_B_TRM3 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_A_TRM4 = i_EMIT_SEL_0; 
@@ -1718,6 +1929,7 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_A_TRM4 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_A_TRM4 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_A_TRM4 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_A_TRM4 =  i_ERP_BUS_7;
 
 
     assign o_THT_ID_1_B_TRM4 = i_EMIT_SEL_0; 
@@ -1742,16 +1954,80 @@ module UART_Controlller_ACU_Plank (
     assign o_ERP_MOD_5_B_TRM4 =  i_ERP_BUS_4;
     assign o_ERP_MOD_6_B_TRM4 =  i_ERP_BUS_5;
     assign o_ERP_MOD_7_B_TRM4 =  i_ERP_BUS_6;
+    assign o_ERP_MOD_8_B_TRM4 =  i_ERP_BUS_7;
 
-    assign o_RESET_A_TRM1 = i_usr_rst;
-    assign o_RESET_B_TRM1 = i_usr_rst;
-    assign o_RESET_A_TRM2 = i_usr_rst;
-    assign o_RESET_B_TRM2 = i_usr_rst;
-    assign o_RESET_A_TRM3 = i_usr_rst;
-    assign o_RESET_B_TRM3 = i_usr_rst;
-    assign o_RESET_A_TRM4 = i_usr_rst;
-    assign o_RESET_B_TRM4 = i_usr_rst;
+    assign o_ATxU_STATUS_SG_0 = i_EMIT_SEL_0 && i_EMIT_SEL_1;
+    assign o_ATxU_STATUS_SG_1 = i_EMIT_SEL_1 && i_EMIT_SEL_2;
+    assign o_ATxU_STATUS_SG_2 = i_EMIT_SEL_2 && i_EMIT_SEL_3;
+    assign o_ATxU_STATUS_SG_3 = i_EMIT_SEL_3 && i_EMIT_SEL_0;
 
+    assign o_DET_ADC_CSB2 = i_DET_ADC_SDO;
+    assign o_DET_ADC_CSB1 = i_DET_ADC_SDO;
+    assign o_DET_ADC_SCK = i_DET_ADC_SDO;
+    assign o_DET_ADC_SDI = i_DET_ADC_SDO;
+
+    assign o_TRM_OFF_A_TRM1 = i_usr_rst; 
+    assign o_TRM_OFF_A_TRM2 = i_usr_rst; 
+    assign o_TRM_OFF_A_TRM3 = i_usr_rst; 
+    assign o_TRM_OFF_A_TRM4 = i_usr_rst; 
+    assign o_TRM_OFF_B_TRM1 = i_usr_rst; 
+    assign o_TRM_OFF_B_TRM2 = i_usr_rst; 
+    assign o_TRM_OFF_B_TRM3 = i_usr_rst; 
+    assign o_TRM_OFF_B_TRM4 = i_usr_rst; 
+
+    assign o_Ext_CLK_IN_A_TRM1 = i_usr_rst;
+    assign o_Ext_CLK_IN_A_TRM2 = i_usr_rst;
+    assign o_Ext_CLK_IN_A_TRM3 = i_usr_rst;
+    assign o_Ext_CLK_IN_A_TRM4 = i_usr_rst;
+    assign o_Ext_CLK_IN_B_TRM1 = i_usr_rst;
+    assign o_Ext_CLK_IN_B_TRM2 = i_usr_rst;
+    assign o_Ext_CLK_IN_B_TRM3 = i_usr_rst;
+    assign o_Ext_CLK_IN_B_TRM4 = i_usr_rst;
+
+    assign o_CLK_OUT_A_TRM1 = i_usr_rst;
+    assign o_CLK_OUT_A_TRM2 = i_usr_rst;
+    assign o_CLK_OUT_A_TRM3 = i_usr_rst;
+    assign o_CLK_OUT_A_TRM4 = i_usr_rst;
+    assign o_CLK_OUT_B_TRM1 = i_usr_rst;
+    assign o_CLK_OUT_B_TRM2 = i_usr_rst;
+    assign o_CLK_OUT_B_TRM3 = i_usr_rst;
+    assign o_CLK_OUT_B_TRM4 = i_usr_rst;
+
+    assign o_FREQ_BAND_SEL_0_A_TRM1 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_A_TRM2 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_A_TRM3 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_A_TRM4 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_B_TRM1 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_B_TRM2 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_B_TRM3 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_0_B_TRM4 = i_usr_rst;
+
+    assign o_FREQ_BAND_SEL_1_A_TRM1 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_A_TRM2 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_A_TRM3 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_A_TRM4 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_B_TRM1 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_B_TRM2 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_B_TRM3 = i_usr_rst;
+    assign o_FREQ_BAND_SEL_1_B_TRM4 = i_usr_rst;
+
+    assign o_T_R_SWITCHING_A_TRM1 = i_usr_rst;
+    assign o_T_R_SWITCHING_A_TRM2 = i_usr_rst;
+    assign o_T_R_SWITCHING_A_TRM3 = i_usr_rst;
+    assign o_T_R_SWITCHING_A_TRM4 = i_usr_rst;
+    assign o_T_R_SWITCHING_B_TRM1 = i_usr_rst;
+    assign o_T_R_SWITCHING_B_TRM2 = i_usr_rst;
+    assign o_T_R_SWITCHING_B_TRM3 = i_usr_rst;
+    assign o_T_R_SWITCHING_B_TRM4 = i_usr_rst;
+
+    assign o_SUB_ARRAY_SEL_1_A_TRM1 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_B_TRM1 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_A_TRM2 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_B_TRM2 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_A_TRM3 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_B_TRM3 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_A_TRM4 = i_usr_rst;
+    assign o_SUB_ARRAY_SEL_1_B_TRM4 = i_usr_rst;
     
     
 
